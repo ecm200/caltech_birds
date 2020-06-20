@@ -9,7 +9,7 @@ import torchvision
 import torchvision.transforms as transforms
 from torchvision import datasets, models
 
-from imutils import paths
+#from imutils import paths
 from pathlib import Path
 import os
 import time
