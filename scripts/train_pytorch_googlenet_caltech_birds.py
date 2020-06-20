@@ -15,7 +15,7 @@ from torchvision import datasets, models
 
 from imutils import paths
 from pathlib import Path
-import os
+import os, sys
 import time
 import copy
 import pickle
@@ -25,6 +25,7 @@ import matplotlib.pylab as plt
 import numpy as np
 
 # Local modules
+sys.path.append('../src')
 from train import train_model
 from visualize import imshow, visualize_model
 from utils import save_model_dict, save_model_full
