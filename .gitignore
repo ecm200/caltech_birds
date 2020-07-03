@@ -1,5 +1,6 @@
 .ipynb_checkpoints
 data
+data_nabirds
 models
 src/__pycache__
 notebooks/*.html
