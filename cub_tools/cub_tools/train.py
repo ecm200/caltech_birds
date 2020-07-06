@@ -19,7 +19,7 @@ import pandas as pd
 import matplotlib.pylab as plt
 import numpy as np
 
-from utils import save_pickle
+from cub_tools.utils import save_pickle
 
 def train_model(model, criterion, optimizer, scheduler, device, dataloaders, dataset_sizes, 
                 num_epochs=25, return_history=False, log_history=True, working_dir='output'):
