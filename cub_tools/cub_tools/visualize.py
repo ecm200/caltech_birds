@@ -20,14 +20,14 @@ import matplotlib.pylab as plt
 import numpy as np
 
 
-def imshow(inp, title=None):
+def imshow(inp, title=None, figsize=(20,8)):
     """Imshow for Tensor."""
     inp = inp.numpy().transpose((1, 2, 0))
     mean = np.array([0.485, 0.456, 0.406])
     std = np.array([0.229, 0.224, 0.225])
     inp = std * inp + mean
     inp = np.clip(inp, 0, 1)
-    plt.figure(figsize=(20,8))
+    plt.figure(figsize=figsize)
     plt.imshow(inp)
     if title is not None:
         plt.title(title)
