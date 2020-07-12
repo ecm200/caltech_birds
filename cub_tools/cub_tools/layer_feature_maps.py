@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 
-def extract_feature_maps(model, dataloader, fc_feature_extractions, device):
+def extract_feature_maps(model, dataloader, fc_feature_extractions, device, batch_limit=None):
     was_training = model.training
     model.eval()
 
@@ -11,6 +11,11 @@ def extract_feature_maps(model, dataloader, fc_feature_extractions, device):
         for i, (inputs, labels, paths) in enumerate(dataloader):
             if i % 25 == 0:
                 print('{}..'.format(i), end='')
+            
+            # Allow early termination of batches if specified
+            if i >= batch_limit:
+                print('..exiting at specified batch limit ({})'.format(batch_limit))
+                break
 
             inputs = inputs.to(device)
             labels = labels.to(device)
