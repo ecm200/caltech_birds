@@ -61,3 +61,37 @@ def visualize_model(model, class_names, device, dataloaders, num_images=6):
                     model.train(mode=was_training)
                     return
         model.train(mode=was_training)
+        
+def visualize_model_grid(model, class_names, device, dataloaders, num_images=6, figsize=(20,20), images_per_row=3):
+    was_training = model.training
+    model.eval()
+    images_so_far = 0
+    fig = plt.figure(figsize=figsize)
+
+    with torch.no_grad():
+        for i, (inputs, labels) in enumerate(dataloaders['test']):
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+            
+
+            outputs = model(inputs)
+            _, preds = torch.max(outputs, 1)
+
+            for j in range(inputs.size()[0]):
+                images_so_far += 1
+                
+                inp = inputs.cpu().data[j].numpy().transpose((1, 2, 0))
+                mean = np.array([0.485, 0.456, 0.406])
+                std = np.array([0.229, 0.224, 0.225])
+                inp = std * inp + mean
+                inp = np.clip(inp, 0, 1)
+                
+                ax = plt.subplot(num_images//images_per_row, images_per_row, images_so_far)
+                ax.axis('off')
+                plt.imshow(inp)
+                plt.title('Actual: {} \n Predicted: {}'.format(class_names[labels[j]], class_names[preds[j]]))
+
+                if images_so_far == num_images:
+                    model.train(mode=was_training)
+                    return
+        model.train(mode=was_training)
