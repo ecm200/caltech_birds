@@ -49,3 +49,43 @@ def make_predictions(model, dataloaders, device):
     print('Complete.')
 
     return labels_truth, labels_pred
+
+
+def make_predictions_proba(model, dataloaders, device):
+    '''
+    Function to take the test validation set of images, and produce predictions.
+    
+    Returns two numpy arrays of truth labels, prediction labels and class probabilities.
+    '''
+
+    was_training = model.training
+    model.eval()
+    images_so_far = 0
+
+
+    print('Commencing predictions minibatch..', end='')
+    with torch.no_grad():
+        for i, (inputs, labels) in enumerate(dataloaders['test']):
+            if i % 25 == 0:
+                print('{}..'.format(i), end='')
+
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+
+
+            outputs = model(inputs)
+            _, preds = torch.max(outputs, 1)
+
+            if i == 0:
+                labels_truth = labels.cpu().numpy()
+                labels_pred = preds.cpu().numpy()
+                scores_pred = outputs.cpu().numpy()
+            else:
+                labels_truth = np.concatenate((labels_truth,labels.cpu().numpy()))
+                labels_pred = np.concatenate((labels_pred,preds.cpu().numpy()))
+                scores_pred= np.concatenate((scores_pred,outputs.cpu().numpy()))
+
+    print('Complete.')
+
+    return {'labels truth' : labels_truth, 'labels pred' : labels_pred, 'scores pred' : scores_pred}
+
