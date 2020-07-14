@@ -37,7 +37,7 @@ def makeAggresiveTransforms(img_crop_size=224, img_resize=256, transform_type='a
         train = transforms.Compose([
                 transforms.RandomResizedCrop(img_crop_size),
                 transforms.RandomHorizontalFlip(),
-                transforms.RandomPerspective(distortion_scale=persp_distortion_scale, p=0.5, interpolation=3, fill=0),
+                transforms.RandomPerspective(distortion_scale=persp_distortion_scale, p=0.5, interpolation=3),# fill=0),
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
             ])
@@ -54,7 +54,7 @@ def makeAggresiveTransforms(img_crop_size=224, img_resize=256, transform_type='a
         train = transforms.Compose([
                 transforms.RandomResizedCrop(img_crop_size),
                 transforms.RandomHorizontalFlip(),
-                transforms.RandomPerspective(distortion_scale=persp_distortion_scale, p=0.5, interpolation=3, fill=0),
+                transforms.RandomPerspective(distortion_scale=persp_distortion_scale, p=0.5, interpolation=3), # fill=0),
                 transforms.RandomRotation(rotation_range, resample=False, expand=False, center=None, fill=None),
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
