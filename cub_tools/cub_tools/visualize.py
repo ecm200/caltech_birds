@@ -89,7 +89,13 @@ def visualize_model_grid(model, class_names, device, dataloaders, num_images=6, 
                 ax = plt.subplot(num_images//images_per_row, images_per_row, images_so_far)
                 ax.axis('off')
                 plt.imshow(inp)
-                plt.title('Actual: {} \n Predicted: {}'.format(class_names[labels[j]], class_names[preds[j]]))
+                
+                if labels[j] == preds[j]:
+                    predict_statement = '**CORRECT PREDICTION**'
+                else:
+                    predict_statement = '!!ERROR IN PREDICTION!!'
+                
+                plt.title('{} \n Actual: {} \n Predicted: {}'.format(predict_statement, class_names[labels[j]], class_names[preds[j]]))
 
                 if images_so_far == num_images:
                     model.train(mode=was_training)
