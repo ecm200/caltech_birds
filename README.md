@@ -1,4 +1,11 @@
-# Introduction
+![PyTorch](https://miro.medium.com/max/2400/1*aqNgmfyBIStLrf9k7d9cng.jpeg)
+
+![Birds](http://www.vision.caltech.edu/graphics/cub_200_collage.jpg)
+
+# Image Classification of birds
+
+**A whistle stop tour of how to use the latest image classification techniques to build and understand a deep neural network bird classifier**
+
 
 This is the Caltech Birds respository using PyTorch CNNs for image classification (CUB-200-2011).
 
@@ -14,6 +21,8 @@ The repository includes a set of example notebooks which walks the user through 
 ## Dataset
 
 Caltech-UCSD Birds-200-2011 (CUB-200-2011) is an extended version of the CUB-200 dataset, with roughly double the number of images per class and new part location annotations. For detailed information about the dataset, please see the technical report linked below.
+
+
 
 Number of categories: 200
 
@@ -84,6 +93,7 @@ All other packages are standard data science tools, for a full list see the **re
 To install the cub_tools set of modules into your PyTorch environment, do the following:
 
   *cd cub_tools*
+  
   *pip install .*
   
  This should create an installed package in your python environment called **cub_tools**.
