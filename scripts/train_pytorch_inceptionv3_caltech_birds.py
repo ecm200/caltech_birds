@@ -25,29 +25,10 @@ import matplotlib.pylab as plt
 import numpy as np
 
 # Local modules
-from train import train_model
-from visualize import imshow, visualize_model
-from utils import save_model_dict, save_model_full
-
-def makeTransforms():
-    # Data augmentation and normalization for training
-    # Just normalization for validation
-    data_transforms = {
-        'train': transforms.Compose([
-            transforms.RandomResizedCrop(299),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-        ]),
-        'test': transforms.Compose([
-            transforms.Resize(512),
-            transforms.CenterCrop(299),
-            transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-        ]),
-    }
-
-    return data_transforms
+from cub_tools.train import train_model
+from cub_tools.visualize import imshow, visualize_model
+from cub_tools.utils import save_model_dict, save_model_full
+from cub_tools.transforms import makeDefaultTransforms
 
 #################################################
 # Script runtime options
@@ -65,7 +46,7 @@ num_epochs = 40
 os.makedirs(working_dir, exist_ok=True)
 
 # Get data transforms
-data_transforms = makeTransforms()
+data_transforms = makeDefaultTransforms(img_crop_size=299, img_resize=512)
 
 # Setup data loaders with augmentation transforms
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x])
