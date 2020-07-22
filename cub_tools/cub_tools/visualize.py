@@ -19,6 +19,12 @@ import pandas as pd
 import matplotlib.pylab as plt
 import numpy as np
 
+from PIL import Image, ImageDraw, ImageFont
+import io
+import base64
+from skimage.util import img_as_uint, img_as_ubyte
+from skimage.io import imsave
+
 
 def imshow(inp, title=None, figsize=(20,8)):
     """Imshow for Tensor."""
@@ -101,3 +107,45 @@ def visualize_model_grid(model, class_names, device, dataloaders, num_images=6, 
                     model.train(mode=was_training)
                     return
         model.train(mode=was_training)
+
+
+def get_title_string_from_classes(classes, class_names):
+    title_str = ''
+    for i_x,x in enumerate(classes):
+        if i_x !=0 and i_x % 4 == 0:
+            title_str = title_str+' ||\n'
+        title_str = title_str + ' || ' + class_names[x]
+    return title_str
+
+
+def encode_image(im):
+    '''
+    Function to encode an image to base64 representation.
+
+    Inputs:
+
+        im, PIL image   PIL image object loaded using PIL.Image.open(image).
+
+    Returns:
+
+        encoded image string in Base64 encoding.
+
+    '''
+    rawBytes = io.BytesIO()    
+    im = Image.fromarray(img_as_ubyte(np.array(im)))
+    im.save(rawBytes, "PNG")
+    rawBytes.seek(0) 
+    encoded_image = base64.b64encode(rawBytes.read()).decode()
+    return f'data:image/png;base64,{encoded_image}'
+
+
+def add_class_to_image(im, classname, textfill=(255,255,255,255), textsize=0.75, textpos=(10,10)):
+    '''
+    Add the class name to the image.
+    '''
+
+    txt = Image.new('RGBA', (int(im.size[0]*textsize),int(im.size[1]*textsize)), (255,255,255,0))
+    d = ImageDraw.Draw(txt)
+    font = ImageFont.load_default()
+    d.text(textpos, classname, font=font, fill=textfill)
+    return Image.alpha_composite(im.convert('RGBA'), txt.resize(im.size))
