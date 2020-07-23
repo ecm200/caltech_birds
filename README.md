@@ -7,7 +7,7 @@
 **A whistle stop tour of how to use the latest image classification techniques to build and understand a deep neural network bird classifier**
 
 
-This is the Caltech Birds respository using PyTorch CNNs for image classification (CUB-200-2011).
+This is an investigation using PyTorch CNNs of deep image classificaton to solve a bird species classification problem with the [Caltech UCSD Birds dataset (CUB-200-2011)](http://www.vision.caltech.edu/visipedia/CUB-200.html). *[Temporary link to data](https://drive.google.com/drive/folders/1kFzIqZL_pEBVR7Ca_8IKibfWoeZc3GT1) whilst CalTech sort out their website for datasets as of July 2020*
 
 This is a collection of notebooks and tools designed to show how to setup, build, train and evaluate Convolutional Neural Network architectures using PyTorch, Torchvision and other 3rd party packages, to generate state-of-the-art classification results on a fine-grained, long-tailed distribution classification problem. The set of example notebooks will cover the following workflow:
 
