@@ -66,13 +66,21 @@ Unzip the dowloaded zip files into cloned repository structure that replicates t
             images.txt
             README
             train_test_split.txt
+        example-notebooks-|   ** WORKSHOP MATERIAL IS IN HERE **
         models-|   ** SEPARATE DOWNLOAD FROM RELEASES **
             classification-|
                 #modelname1#-|
                 #modelname2#-|
-        notebooks-|
-        scripts-|
+        notebooks-|      ** INVESTIGATIONS OF ALL TYPES OF CNN ARCHITECTURES ON THE BIRD CLASSIFICATION PROBLEM **
+        scripts-|        ** TRAINING SCRIPTS FOR PYTORCH CNN MODELS **
 
+
+
+# Workshop walk-through notebooks series
+
+**example_notebooks directory contains the walk-through workshop notebooks**, for following the full workflow of producing a bird classifier using deep neural networks, using a ResNet152 deep neural network architecture.
+
+See below on the requirements for installing and using the notebooks, as  well details of the additional folders including more CNN architecture investigations using the CUB-200-2011 dataset.
 
 
 # Installation
@@ -80,7 +88,6 @@ Unzip the dowloaded zip files into cloned repository structure that replicates t
 The repository should be cloned into a local directory.
 
 Additional steps are required to make a suitable python environment for running.
-
 
 ## Requirements
 
@@ -99,12 +106,10 @@ To install the cub_tools set of modules into your PyTorch environment, do the fo
  This should create an installed package in your python environment called **cub_tools**.
 
 # Additional files
-
-**example_notebooks** directory contains the set of walk through notebooks, of which this is the first, for following the full workflow of producing a bird classifier using deep neural networks, using a ResNet152 deep neural network architecture.
         
 **notebooks** directory contain the Jupyter notebooks where the majority of the visualisation and high level code will be maintained.
 
-**scripts** directory contains the computationally intensive functions which take longer to run, and are better executed in a python script, using some form of terminal persistance method to keep the computational session open whilst the program is running. In most examples in this project, it is the training of the Neural Networks where this will be achieved, that can typically take a few hours, to a day or so. I prefer to use [TMUX](https://github.com/tmux/tmux/wiki/Getting-Started), which is a Linux utility that maintains separate terminal sessions that can be attached and detached to any linux terminal session once opened. This way, you can execute long running python training scripts inside a TMUX session, detach it, close down the terminal session and let the process run. You can then start a new terminal session, and then attach the running TMUX session to view the progress of the executed script, including all its output to terminal history.
+**scripts** directory contains the computationally intensive training scripts for various deep CNN architectures, which take longer to run (even on GPU) and are better executed in a python script. I suggest this be done using some form of terminal persistance method (if running in the cloud) to keep the terminal session open whilst the model is training, allowing you to log off the remote host without killing the process. These can typically take a few hours, to a day or so to complete the prescribed epochs. I prefer to use [TMUX](https://github.com/tmux/tmux/wiki/Getting-Started), which is a Linux utility that maintains separate terminal sessions that can be attached and detached to any linux terminal session once opened. This way, you can execute long running python training scripts inside a TMUX session, detach it, close down the terminal session and let the process run. You can then start a new terminal session, and then attach the running TMUX session to view the progress of the executed script, including all its output to terminal history.
 
 **cub_tools** directory contains all the utility functions that have been developed to process, visualise, train and evaluate CNN models, as well results post processing have been contained. It has been converted into a python package that can be installed in the local environment by running in the **cub_tools** directory, *pip install -e .*. The functions can then be accessed using the cub_tools module import as ***import cub_tools***.
 
