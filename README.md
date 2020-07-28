@@ -92,7 +92,7 @@ Additional steps are required to make a suitable python environment for running.
 ## Requirements
 
 All models have been produced using **Python v3.7**.
-All model training has been performed on **PyTorch >=v1.4**.
+All model training has been performed on **PyTorch == v1.4.0**.
 All other packages are standard data science tools, for a full list see the **requirement.txt** file
 
 ## CUB_TOOLS package installation
