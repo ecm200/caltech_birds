@@ -5,7 +5,7 @@
 **A whistle stop tour of how to use the latest image classification techniques to build and understand a deep neural network bird classifier**
 
 
-This is an investigation using PyTorch CNNs of deep image classificaton to solve a bird species classification problem with the [Caltech UCSD Birds dataset (CUB-200-2011)](http://www.vision.caltech.edu/visipedia/CUB-200.html). *[Temporary link to data](https://drive.google.com/drive/folders/1kFzIqZL_pEBVR7Ca_8IKibfWoeZc3GT1) whilst CalTech sort out their website for datasets as of July 2020*
+This is an investigation using PyTorch CNNs of deep image classificaton to solve a bird species classification problem with the [Caltech UCSD Birds dataset (CUB-200-2011)](http://www.vision.caltech.edu/visipedia/CUB-200.html).
 
 This is a collection of notebooks and tools designed to show how to setup, build, train and evaluate Convolutional Neural Network architectures using PyTorch, Torchvision and other 3rd party packages, to generate state-of-the-art classification results on a fine-grained, long-tailed distribution classification problem. The set of example notebooks will cover the following workflow:
 
@@ -37,13 +37,8 @@ Some related datasets are Caltech-256, the Oxford Flower Dataset, and Animals wi
 To download the data click on the following links:
 
    1. Images and annotations [Link](http://www.vision.caltech.edu/visipedia-data/CUB-200-2011/CUB_200_2011.tgz)
-       
-       *(Alternatively these can be downloaded from the releases page of this repository: [ecm200 CalTech Birds](https://github.com/ecm200/caltech_birds))*
-       *Two files are available:
-               
-               CUB_200_2011_data_original.zip - which contains all the images and ancillary data listed below, with exec.
-               
-               CUB_200_2011_data_original.zip - this contains the sorted images in train and test folders, given by the train_test_split.txt*
+   
+   **The image tarball should be downloaded to repository root, and extracted into the data/images_orig sub-directory, as shown below.***
                
     
    2. Segmentations (optional, not need for this work) [Link](http://www.vision.caltech.edu/visipedia-data/CUB-200-2011/segmentations.tgz)
@@ -57,6 +52,9 @@ Unzip the dowloaded zip files into cloned repository structure that replicates t
         data-|   ** SEPARATE DOWNLOAD FROM RELEASES **
             attributes-|
             images_orig-|
+               ##class_name##-|
+                  class001-image001.jpg
+                  class001-image002.jpg
             images-|
             parts-|
             attributes.txt
