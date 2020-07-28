@@ -36,12 +36,12 @@ Some related datasets are Caltech-256, the Oxford Flower Dataset, and Animals wi
 
 To download the data click on the following links:
 
-   1. Images and annotations [Link](http://www.vision.caltech.edu/visipedia-data/CUB-200-2011/CUB_200_2011.tgz)
+   1. Images and annotations [CalTech Visipedia Website - CUB_200_2011.tgz](http://www.vision.caltech.edu/visipedia-data/CUB-200-2011/CUB_200_2011.tgz)
    
    **The image tarball should be downloaded to repository root, and extracted into the data/images_orig sub-directory, as shown below.***
                
     
-   2. Segmentations (optional, not need for this work) [Link](http://www.vision.caltech.edu/visipedia-data/CUB-200-2011/segmentations.tgz)
+   2. Segmentations (optional, not need for this work) [CalTech Visipedia Website - segmentations.tgz](http://www.vision.caltech.edu/visipedia-data/CUB-200-2011/segmentations.tgz)
     
 Place the files into the root of the cloned caltech_birds repo file structure.
 
@@ -49,13 +49,19 @@ Unzip the dowloaded zip files into cloned repository structure that replicates t
 
     caltech_birds-|
         cub_tools-|
-        data-|   ** SEPARATE DOWNLOAD FROM RELEASES **
+        data-|   ** SEPARATE DOWNLOAD FROM CALTECH VISIPEDIA WEBSITE **
             attributes-|
-            images_orig-|
+            images_orig-|   ** RENAME IMAGES FOLDER TO IMAGE_ORIG **
                ##class_name##-|
                   class001-image001.jpg
                   class001-image002.jpg
-            images-|
+            images-|   ** NEW FOLDER CREATED BY FIRST WORKFLOW PROCESS **
+               train-|
+                  ##class_name##-|
+                     class###-image001.jpg
+               test-|
+                  ##class_name##-|
+                     class###-image035.jpg
             parts-|
             attributes.txt
             bounding_boxes.txt
