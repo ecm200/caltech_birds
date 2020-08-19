@@ -17,6 +17,7 @@ import os
 import sys
 import time
 import copy
+import pickle
 
 import pandas as pd
 import matplotlib.pylab as plt
@@ -60,6 +61,7 @@ class stackedEnsemble():
         self.stackX = None
         self.stacky = None
         self.test_stackX = None
+        self.test_stacky = None
         self.yhat = None
 
         self.meta_learner_fit = False
@@ -90,10 +92,12 @@ class stackedEnsemble():
 
         # generate stacked dataset from input images in dataloader
         print('[INFO] Creating the meta learner inputs (probabilities from individual models) as none provided.')
-        self.stackX, self.stacky = stacked_dataset_from_dataloader(self.models, self.train_dataloader, self.device)
-
+        self.stackX, self.stacky = self._stacked_dataset_from_dataloader(self.models, self.train_dataloader, self.device)
+        if np.ndim(self.stacky) > 1:
+            self.stacky = self.stacky.ravel()
+                  
         # fit standalone model
-        fit_meta_learner()
+        self._fit_meta_learner()
         self.meta_learner_fit = True
         print('..Complete')
     
@@ -115,19 +119,21 @@ class stackedEnsemble():
         ***
         image N: |---200 class probability columns model 1---|---200 class probability columns model 2---|---***---|---200 class probability columns model M---|
         '''
+        
+        assert np.ndim(stacky) == 1, 'stacky should be a 1D array of class labels. Found an array with 2 or more dimensions. Suggest pass array with .ravel() method as input.'
 
         print('[INFO] Stacked input table and labels found, using these to train meta learner.')
         self.stackX = stackX
         self.stacky = stacky
         
         # fit standalone model
-        fit_meta_learner()
+        self._fit_meta_learner()
         self.meta_learner_fit = True
         print('..Complete')
         
     
     
-    def predict(self, dataloader=None, stackX=None):
+    def predict(self, dataloader, return_ytrue=False):
         '''
         Predict class of input images, first converting the input dataset to a stacked dataset.
         '''
@@ -136,13 +142,20 @@ class stackedEnsemble():
 
         # create dataset using ensemble
         print('[INFO] Creating the meta learner inputs (probabilities from individual models) as none provided.')
-        self.test_stackX, _ = stacked_dataset_from_dataloader(self.models, self.test_dataloader, self.device)
+        self.test_stackX, self.test_stacky = self._stacked_dataset_from_dataloader(self.models, self.test_dataloader, self.device)
+        if np.ndim(self.test_stacky) > 1:
+            self.test_stacky = self.test_stacky.ravel()
         
         # predict using the trained meta learner
         print('[INFO] Predicting with the meta learner...', end='')
-        self.yhat = self.meta_model.predict(X=self.test_stackX)
+        self.yhat = self.meta_model.predict(self.test_stackX)
         
         print('..Complete')
+        
+        if return_ytrue:
+            return self.yhat, self.test_stacky
+        else:
+            return self.yhat
 
 
 
@@ -158,8 +171,23 @@ class stackedEnsemble():
 
         # predict using the trained meta learner
         print('[INFO] Predicting with the meta learner...', end='')
-        self.yhat = self.meta_model.predict(X=self.test_stackX)
-
+        self.yhat = self.meta_model.predict(self.test_stackX)
+        
+        return self.yhat
+        
+    
+    def save(self, fname_pre=None, fname_path=''):
+        '''
+        Save the meta learner class object to pickle file.
+        '''
+        outf = os.path.join(fname_path,fname_pre+'_mtlearner.pkl')
+        save_pickle(self, outf)
+        
+        
+    def load(self, fname_path):
+        with open(fname_path, 'r') as f:
+            self.__dict__.update(pickle.load(f).__dict__)
+        
 
     def save_stacked_dataset(self, dstack_type='train', fname_pre=None, fname_path=''):
         '''
@@ -189,18 +217,26 @@ class stackedEnsemble():
             if fname_pre == None:
                 fname_pre = 'test'
             outf = os.path.join(fname_path,fname_pre+'_stackX.pkl')
-            save_pickle(self.stackX, out_f)
+            save_pickle(self.test_stackX, outf)
             print('[IO] Saved stacked test set input data to: {}'.format(outf))
+            if self.test_stacky is not None:
+                outf = os.path.join(fname_path,fname_pre+'_stacky.pkl')
+                save_pickle(self.test_stacky, outf)
+                print('[IO] Saved stacked test set labels data to: {}'.format(outf))
+            
 
+            
         
-    def class_report(self, y_true):
-        assert self.yhat is not None, 'No predictions found to compare to true classes. Run predict or predict_stacked method to generate predictions.'
-        from sklearn.metrics import classification_report
-        print(classification_report(y_pred=self.yhat, y_true=y_true))
+    def class_report(self, y_true, y_pred=None):
+        if y_pred is None:
+            assert self.yhat is not None, 'No predictions found to compare to true classes. Run predict or predict_stacked method to generate predictions or pass in y_pred vector.'
+            print(classification_report(y_pred=self.yhat, y_true=y_true))
+        else:
+            print(classification_report(y_pred=y_pred, y_true=y_true))
+            
+            
 
-
-
-    def fit_meta_learner(self):
+    def _fit_meta_learner(self):
         '''
         Fit the scikit learn classification object type meta learner with the stacked dataset and labels.
         '''
@@ -215,7 +251,7 @@ class stackedEnsemble():
         
         
 
-    def stacked_dataset_from_dataloader(self, models, dataloader, device):
+    def _stacked_dataset_from_dataloader(self, models, dataloader, device):
         '''
         Stack the input dataset of images as output probabilbities from each model.
 
@@ -278,3 +314,9 @@ class stackedEnsemble():
 
         print('..Complete')
         return stackX, stacky
+    
+    
+    
+def softmax(x):
+    """Compute softmax values for each sets of scores in x."""
+    return np.exp(x) / np.sum(np.exp(x), axis=0)
