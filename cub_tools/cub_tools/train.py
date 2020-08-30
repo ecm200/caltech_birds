@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.optim import lr_scheduler
+from torch.utils.tensorboard import SummaryWriter
 
 import torchvision
 import torchvision.transforms as transforms
@@ -22,13 +23,17 @@ import numpy as np
 from cub_tools.utils import save_pickle
 
 def train_model(model, criterion, optimizer, scheduler, device, dataloaders, dataset_sizes, 
-                num_epochs=25, return_history=False, log_history=True, working_dir='output'):
+                num_epochs=25, return_history=False, log_history=True, log_history_fname='model_history',
+                working_dir='output'):
     since = time.time()
 
     best_model_wts = copy.deepcopy(model.state_dict())
     best_acc = 0.0
     
     history = {'epoch' : [], 'train_loss' : [], 'test_loss' : [], 'train_acc' : [], 'test_acc' : []}
+    
+    if log_history:
+        writer = SummaryWriter(os.path.join(working_dir,'tfb_log'))
 
     for epoch in range(num_epochs):
         print('Epoch {}/{}'.format(epoch, num_epochs - 1))
@@ -67,15 +72,25 @@ def train_model(model, criterion, optimizer, scheduler, device, dataloaders, dat
                 # statistics
                 running_loss += loss.item() * inputs.size(0)
                 running_corrects += torch.sum(preds == labels.data)
-            if phase == 'train':
-                scheduler.step()
+            
 
             epoch_loss = running_loss / dataset_sizes[phase]
             epoch_acc = running_corrects.double() / dataset_sizes[phase]
             
+            if phase == 'train':
+                # Some schedulers require arguments to be passed on the step method call
+                if isinstance(scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+                    scheduler.step(epoch_loss)
+                else:
+                    scheduler.step()
+            
             history['epoch'].append(epoch)
             history[phase+'_loss'].append(epoch_loss)
             history[phase+'_acc'].append(epoch_acc)
+            
+            if log_history:
+                writer.add_scalar('Loss/'+phase, epoch_loss, epoch)
+                writer.add_scalar('Accuracy/'+phase, epoch_acc, epoch)
 
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(
                 phase, epoch_loss, epoch_acc))
@@ -87,7 +102,7 @@ def train_model(model, criterion, optimizer, scheduler, device, dataloaders, dat
 
         
         if log_history:
-            save_pickle(history,os.path.join(working_dir,'model_history.pkl'))
+            save_pickle(history,os.path.join(working_dir,log_history_fname+'.pkl'))
         print()
 
     time_elapsed = time.time() - since
@@ -98,6 +113,9 @@ def train_model(model, criterion, optimizer, scheduler, device, dataloaders, dat
     # load best model weights
     print('Returning object of best model.')
     model.load_state_dict(best_model_wts)
+    
+    if log_history:
+        writer.close()
     
     if return_history:
         return model, history
