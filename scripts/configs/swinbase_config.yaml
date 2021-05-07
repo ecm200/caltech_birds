@@ -1,0 +1,15 @@
+# my_project/config.py
+
+MODEL:
+    MODEL_LIBRARY: 'timm'
+    MODEL_NAME: 'swin_base_patch4_window12_384'
+DIRS:
+    ROOT_DIR: '/home/edmorris/projects/image_classification/caltech_birds'
+TRAIN:
+    NUM_EPOCHS: 40
+DATA: 
+    TRANSFORMS:
+        PARAMS:
+            DEFAULT:
+                img_crop_size: 384
+                img_resize: 512

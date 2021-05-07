@@ -1,23 +1,10 @@
 from __future__ import print_function, division
 
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.optim import lr_scheduler
-
-import torchvision
-import torchvision.transforms as transforms
-from torchvision import datasets, models
-
-#from imutils import paths
-from pathlib import Path
 import os
 import time
 import copy
 
-import pandas as pd
-import matplotlib.pylab as plt
-import numpy as np
+import torch
 
 from cub_tools.utils import save_pickle
 
