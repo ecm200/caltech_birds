@@ -12,6 +12,10 @@ _C.MODEL.MODEL_LIBRARY = 'torchvision'
 _C.MODEL.MODEL_NAME = 'test'
 # Pretrain weights
 _C.MODEL.PRETRAINED = True
+# With nVidia AMP
+_C.MODEL.WITH_AMP = True
+# With Grad Scaling
+_C.MODEL.WITH_GRAD_SCALE = False
 
 
 # Training parameters
@@ -22,6 +26,8 @@ _C.TRAIN.BATCH_SIZE = 16
 _C.TRAIN.NUM_WORKERS = 4
 # Total number of epochs to train for
 _C.TRAIN.NUM_EPOCHS = 40
+# Early stopping in epochs 
+_C.EARLY_STOPPING_PATIENCE = 5
 # Loss Criterion
 _C.TRAIN.LOSS = CN()
 # Loss function
