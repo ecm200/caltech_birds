@@ -28,6 +28,7 @@ class Trainer():
             'val_loader' : False,
             'data_transforms' : False
         }
+        print('[INFO] Parameters Override:: {}'.format(cmd_args))
 
         # Load the model configuration
         self.config = get_cfg_defaults()
