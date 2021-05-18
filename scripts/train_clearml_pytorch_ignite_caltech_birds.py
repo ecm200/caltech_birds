@@ -4,7 +4,7 @@
 from __future__ import print_function, division
 
 # Clear ML experiment
-from clearml import Task, StorageManager
+from clearml import Task, StorageManager, Dataset
 
 
 # Local modules
@@ -15,6 +15,11 @@ from cub_tools.args import get_parser
 parser = get_parser()
 parser.print_help()
 args = parser.parse_args()
+
+#print('[INFO] Optional Arguments from CLI:: {}'.format(args.opts))
+#if args.opts == '[]':
+#    args.opts = list()
+#    print('[INFO] Setting empty CLI args to an explicit empty list')
 
 ## CLEAR ML
 # Connecting with the ClearML process
@@ -31,9 +36,17 @@ params_list = []
 for key in params:
     params_list.extend([key,params[key]])
 
+# Check if the task is running locally.
+# If not then, get the datasets from the server.
+if not task.running_locally:
+    print('[INFO] Getting a local copy of the CUB200 birds dataset')
+    train_dataset = Dataset.get(dataset_project='Caltech Birds', dataset_name='cub200_2011_train_dataset')
+    train_dataset.get_mutable_local_copy(target_folder='./data/images/train')
+    test_dataset = Dataset.get(dataset_project='Caltech Birds', dataset_name='cub200_2011_test_dataset')
+    train_dataset.get_mutable_local_copy(target_folder='./data/images/train')
 
 # Create the trainer object
-trainer = Ignite_Trainer(config=args.config, cmd_args=args.opts+params_list)
+trainer = Ignite_Trainer(config=args.config, cmd_args=params_list) # NOTE: disabled cmd line argument passing but using it to pass ClearML configs.
 
 # Setup the data transformers
 print('[INFO] Creating data transforms...')
