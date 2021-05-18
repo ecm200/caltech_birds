@@ -16,7 +16,7 @@ from cub_tools.utils import save_model_dict, save_model_full
 
 
 class Trainer():
-    def __init__(self, config, framework=None, model=None, device=None, optimizer=None, scheduler=None, criterion=None, train_loader=None, val_loader=None, data_transforms=None):
+    def __init__(self, config, cmd_args=None, framework=None, model=None, device=None, optimizer=None, scheduler=None, criterion=None, train_loader=None, val_loader=None, data_transforms=None):
 
         # Create status check dictionary, model will only execute training if all True.
         self.trainer_status = {
@@ -32,6 +32,8 @@ class Trainer():
         # Load the model configuration
         self.config = get_cfg_defaults()
         self.config.merge_from_file(config)
+        # Override config from command line arguments
+        self.config.merge_from_list(cmd_args)
         # Creating correct working directories
         if framework is not None:
             self.config.DIRS.WORKING_DIR = os.path.join(self.config.DIRS.ROOT_DIR, self.config.DIRS.WORKING_DIR, framework+'_'+self.config.MODEL.MODEL_NAME)
@@ -393,9 +395,10 @@ from torch.cuda.amp import GradScaler, autocast
 class Ignite_Trainer(Trainer):
 
     
-    def __init__(self, config, framework='ignite', model=None, device=None, optimizer=None, scheduler=None, criterion=None, train_loader=None, val_loader=None, data_transforms=None):
+    def __init__(self, config, cmd_args=None, framework='ignite', model=None, device=None, optimizer=None, scheduler=None, criterion=None, train_loader=None, val_loader=None, data_transforms=None):
         super().__init__(
-            config, 
+            config,
+            cmd_args=cmd_args, 
             framework=framework,
             model=model, 
             device=device, 
