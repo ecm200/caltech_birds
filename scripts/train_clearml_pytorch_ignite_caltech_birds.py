@@ -10,6 +10,7 @@ from clearml import Task, StorageManager, Dataset
 # Local modules
 from cub_tools.trainer import Ignite_Trainer
 from cub_tools.args import get_parser
+from cub_tools.config import get_cfg_defaults
 
 # Get the arguments from the command line, including configuration file and any overrides.
 parser = get_parser()
@@ -22,8 +23,11 @@ args = parser.parse_args()
 #    print('[INFO] Setting empty CLI args to an explicit empty list')
 
 ## CLEAR ML
+# Tmp config load for network name
+cfg = get_cfg_defaults()
+cfg.merge_from_file(args.config)
 # Connecting with the ClearML process
-task = Task.init(project_name='Caltech Birds', task_name='Train PyTorch CNN on CUB200 using Ignite', task_type=Task.TaskTypes.training)
+task = Task.init(project_name='Caltech Birds', task_name='Train PyTorch CNN on CUB200 using Ignite [Library: '+cfg.MODEL.MODEL_LIBRARY+', Network: '+cfg.MODEL.MODEL_NAME+']', task_type=Task.TaskTypes.training)
 # Add the local python package as a requirement
 task.add_requirements('./cub_tools')
 task.add_requirements('git+https://github.com/rwightman/pytorch-image-models.git')
