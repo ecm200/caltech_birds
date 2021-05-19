@@ -59,6 +59,8 @@ _C.DIRS.CLEAN_UP = True
 _C.DATA = CN()
 # Dir containing train test folders of images
 _C.DATA.DATA_DIR = 'data/images'
+_C.DATA.TRAIN_DIR = 'train'
+_C.DATA.TEST_DIR = 'test'
 # Number of classes
 _C.DATA.NUM_CLASSES = 200
 # Image transforms

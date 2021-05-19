@@ -157,6 +157,8 @@ class Trainer():
         self.train_loader, self.val_loader = create_dataloaders(
             data_transforms=self.data_transforms, 
             data_dir=self.config.DATA.DATA_DIR, 
+            train_dir=self.config.DATA.TRAIN_DIR,
+            test_dir=self.config.DATA.TEST_DIR,
             batch_size=self.config.TRAIN.BATCH_SIZE, 
             num_workers=self.config.TRAIN.NUM_WORKERS
             )

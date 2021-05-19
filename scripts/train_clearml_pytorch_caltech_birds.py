@@ -8,7 +8,7 @@ import os, pathlib
 from clearml import Task, StorageManager, Dataset
 
 # Local modules
-from cub_tools.trainer import Ignite_Trainer
+from cub_tools.trainer import Trainer
 from cub_tools.args import get_parser
 
 # Get the arguments from the command line, including configuration file and any overrides.
@@ -23,7 +23,7 @@ args = parser.parse_args()
 
 ## CLEAR ML
 # Connecting with the ClearML process
-task = Task.init(project_name='Caltech Birds', task_name='Train PyTorch CNN on CUB200 using Ignite', task_type=Task.TaskTypes.training)
+task = Task.init(project_name='Caltech Birds', task_name='Train PyTorch CNN on CUB200', task_type=Task.TaskTypes.training)
 # Add the local python package as a requirement
 task.add_requirements('./cub_tools')
 task.add_requirements('git+https://github.com/rwightman/pytorch-image-models.git')
@@ -71,23 +71,18 @@ print('[INFO] Task output destination:: {}'.format(task.get_output_destination()
 
 print('[INFO] Final parameter list passed to Trainer object:: {}'.format(params_list))
 
-# Create the trainer object
-trainer = Ignite_Trainer(config=args.config, cmd_args=params_list) # NOTE: disabled cmd line argument passing but using it to pass ClearML configs.
+trainer = Trainer(config=args.config, cmd_args=params_list)
 
 # Setup the data transformers
-print('[INFO] Creating data transforms...')
 trainer.create_datatransforms()
 
 # Setup the dataloaders
-print('[INFO] Creating data loaders...')
 trainer.create_dataloaders()
 
 # Setup the model
-print('[INFO] Creating the model...')
 trainer.create_model()
 
 # Setup the optimizer
-print('[INFO] Creating optimizer...')
 trainer.create_optimizer()
 
 # Setup the scheduler
@@ -96,5 +91,5 @@ trainer.create_scheduler()
 # Train the model
 trainer.run()
 
-## Save the best model
-#trainer.save_best_model()
+# Save the best model
+trainer.save_best_model()
