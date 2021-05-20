@@ -1,6 +1,6 @@
 # my_project/config.py
 from yacs.config import CfgNode as CN
-import os
+import yacs
 
 _C = CN()
 
@@ -13,7 +13,7 @@ _C.MODEL.MODEL_NAME = 'test'
 # Pretrain weights
 _C.MODEL.PRETRAINED = True
 # With nVidia AMP
-_C.MODEL.WITH_AMP = True
+_C.MODEL.WITH_AMP = False
 # With Grad Scaling
 _C.MODEL.WITH_GRAD_SCALE = False
 
@@ -83,8 +83,35 @@ _C.SYSTEM = CN()
 # Save history to disk as pkl file
 _C.SYSTEM.LOG_HISTORY = True
 
+
+
 def get_cfg_defaults():
   """Get a yacs CfgNode object with default values for my_project."""
   # Return a clone so that the defaults will not be altered
   # This is for the "local variable" use pattern
   return _C.clone()
+
+
+
+def get_key_value_dict(cfg):
+    cfg_params = {}
+    for key_layer_1 in cfg.keys():
+        if isinstance(cfg[key_layer_1], yacs.config.CfgNode):
+            for key_layer_2 in cfg[key_layer_1].keys():
+                if isinstance(cfg[key_layer_1][key_layer_2], yacs.config.CfgNode):
+                    for key_layer_3 in cfg[key_layer_1][key_layer_2].keys():
+                        if isinstance(cfg[key_layer_1][key_layer_2][key_layer_3], yacs.config.CfgNode):
+                            for key_layer_4 in cfg[key_layer_1][key_layer_2][key_layer_3].keys():
+                                if isinstance(cfg[key_layer_1][key_layer_2][key_layer_3][key_layer_4], yacs.config.CfgNode):
+                                    for key_layer_5 in cfg[key_layer_1][key_layer_2][key_layer_3][key_layer_4].keys():
+                                        cfg_params[key_layer_1+'.'+key_layer_2+'.'+key_layer_3+'.'+key_layer_4+'.'+key_layer_5] = cfg[key_layer_1][key_layer_2][key_layer_3][key_layer_4][key_layer_5]
+                                else:
+                                    cfg_params[key_layer_1+'.'+key_layer_2+'.'+key_layer_3+'.'+key_layer_4] = cfg[key_layer_1][key_layer_2][key_layer_3][key_layer_4]
+                        else:
+                            cfg_params[key_layer_1+'.'+key_layer_2+'.'+key_layer_3] = cfg[key_layer_1][key_layer_2][key_layer_3]
+                else:
+                    cfg_params[key_layer_1+'.'+key_layer_2] = cfg[key_layer_1][key_layer_2]
+        else:
+            cfg_params[key_layer_1] = cfg[key_layer_1]
+    
+    return cfg_params

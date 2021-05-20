@@ -34,7 +34,8 @@ class Trainer():
         self.config = get_cfg_defaults()
         self.config.merge_from_file(config)
         # Override config from command line arguments
-        self.config.merge_from_list(cmd_args)
+        if (cmd_args is not None): #or (cmd_args == '[]') or (not cmd_args):
+            self.config.merge_from_list(cmd_args)
         # Creating correct working directories
         if framework is not None:
             self.config.DIRS.WORKING_DIR = os.path.join(self.config.DIRS.ROOT_DIR, self.config.DIRS.WORKING_DIR, framework+'_'+self.config.MODEL.MODEL_NAME)

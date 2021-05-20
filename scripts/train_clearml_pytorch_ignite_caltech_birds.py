@@ -6,11 +6,12 @@ import os, pathlib
 
 # Clear ML experiment
 from clearml import Task, StorageManager, Dataset
+import yacs
 
 # Local modules
 from cub_tools.trainer import Ignite_Trainer
 from cub_tools.args import get_parser
-from cub_tools.config import get_cfg_defaults
+from cub_tools.config import get_cfg_defaults, get_key_value_dict
 
 # Get the arguments from the command line, including configuration file and any overrides.
 parser = get_parser()
@@ -26,14 +27,19 @@ args = parser.parse_args()
 # Tmp config load for network name
 cfg = get_cfg_defaults()
 cfg.merge_from_file(args.config)
+params = get_key_value_dict(cfg)
+
 # Connecting with the ClearML process
+Task.add_requirements('git+https://github.com/ecm200/caltech_birds.git@clearml_integrations#egg=cub_tools&subdirectory=cub_tools/')
+Task.add_requirements('git+https://github.com/rwightman/pytorch-image-models.git')
 task = Task.init(project_name='Caltech Birds', task_name='Train PyTorch CNN on CUB200 using Ignite [Library: '+cfg.MODEL.MODEL_LIBRARY+', Network: '+cfg.MODEL.MODEL_NAME+']', task_type=Task.TaskTypes.training)
 # Add the local python package as a requirement
-task.add_requirements('./cub_tools')
-task.add_requirements('git+https://github.com/rwightman/pytorch-image-models.git')
+
+
+
 # Setup ability to add configuration parameters control.
-params = {'TRAIN.NUM_EPOCHS': 20, 'TRAIN.BATCH_SIZE': 32, 'TRAIN.OPTIMIZER.PARAMS.lr': 0.001, 'TRAIN.OPTIMIZER.PARAMS.momentum': 0.9}
-params = task.connect(params)  # enabling configuration override by clearml
+#params = {'TRAIN.NUM_EPOCHS': 20, 'TRAIN.BATCH_SIZE': 32, 'TRAIN.OPTIMIZER.PARAMS.lr': 0.001, 'TRAIN.OPTIMIZER.PARAMS.momentum': 0.9}
+params = task.connect(cfg, name='YACS')  # enabling configuration override by clearml
 print(params)  # printing actual configuration (after override in remote mode)
 # Convert Params dictionary into a set of key value pairs in a list
 params_list = []
@@ -42,7 +48,6 @@ for key in params:
 
 # Execute task remotely
 task.execute_remotely()
-
 
 # Get the dataset from the clearml-server and cache locally.
 print('[INFO] Getting a local copy of the CUB200 birds datasets')

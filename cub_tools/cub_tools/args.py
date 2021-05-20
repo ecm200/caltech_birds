@@ -22,5 +22,3 @@ def get_parser(config_file=None):
         nargs=argparse.REMAINDER,
     )
     return parser
-
-    
