@@ -391,7 +391,7 @@ class Trainer():
 
 from ignite.engine import Events, create_supervised_trainer, create_supervised_evaluator, Engine
 from ignite.metrics import Accuracy, Loss, RunningAverage, ConfusionMatrix, Recall, Fbeta, Precision, TopKCategoricalAccuracy
-from ignite.handlers import ModelCheckpoint, EarlyStopping
+from ignite.handlers import ModelCheckpoint, EarlyStopping, Checkpoint
 from ignite.contrib.handlers.param_scheduler import LRScheduler
 from ignite.contrib.handlers.tensorboard_logger import TensorboardLogger, global_step_from_engine, WeightsHistHandler, GradsHistHandler
 from ignite.contrib.engines import common
@@ -641,6 +641,33 @@ class Ignite_Trainer(Trainer):
         self.train_engine.run(self.train_loader, max_epochs=self.config.TRAIN.NUM_EPOCHS)
         print('[INFO] Model training is complete.')
 
+from ignite.contrib.handlers.clearml_logger import ClearMLSaver
+class ClearML_Ignite_Trainer(Ignite_Trainer):
+
+    def create_callbacks(self):
+
+        ## SETUP CALLBACKS
+        print('[INFO] Creating callback functions for training loop...', end='')
+        # Early Stopping - stops training if the validation loss does not decrease after 5 epochs
+        handler = EarlyStopping(patience=self.config.EARLY_STOPPING_PATIENCE, score_function=score_function_loss, trainer=self.train_engine)
+        self.evaluator.add_event_handler(Events.COMPLETED, handler)
+        print('Early Stopping ({} epochs)...'.format(self.config.EARLY_STOPPING_PATIENCE), end='')        
+
+        val_checkpointer = Checkpoint(
+            {"model": self.model},
+            ClearMLSaver(),
+            n_saved=1,
+            score_function=score_function_acc,
+            score_name="val_acc",
+            filename_prefix='cub200_{}_ignite_best'.format(self.config.MODEL.MODEL_NAME),
+            global_step_transform=global_step_from_engine(self.train_engine),
+        )
+        self.evaluator.add_event_handler(Events.EPOCH_COMPLETED, val_checkpointer)
+        print('Model Checkpointing...', end='')
+        print('Done')
+
+        
+
 
 def score_function_loss(engine):
         '''
@@ -652,3 +679,5 @@ def score_function_loss(engine):
 
 def score_function_acc(engine):
     return engine.state.metrics["accuracy"]
+
+

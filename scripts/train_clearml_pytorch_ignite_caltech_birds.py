@@ -9,7 +9,7 @@ from clearml import Task, StorageManager, Dataset
 import yacs
 
 # Local modules
-from cub_tools.trainer import Ignite_Trainer
+from cub_tools.trainer import Ignite_Trainer, ClearML_Ignite_Trainer
 from cub_tools.args import get_parser
 from cub_tools.config import get_cfg_defaults, get_key_value_dict
 
@@ -81,7 +81,7 @@ print('[INFO] Task output destination:: {}'.format(task.get_output_destination()
 print('[INFO] Final parameter list passed to Trainer object:: {}'.format(params_list))
 
 # Create the trainer object
-trainer = Ignite_Trainer(config=args.config, cmd_args=params_list) # NOTE: disabled cmd line argument passing but using it to pass ClearML configs.
+trainer = ClearML_Ignite_Trainer(config=args.config, cmd_args=params_list) # NOTE: disabled cmd line argument passing but using it to pass ClearML configs.
 
 # Setup the data transformers
 print('[INFO] Creating data transforms...')
