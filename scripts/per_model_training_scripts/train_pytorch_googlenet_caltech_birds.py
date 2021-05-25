@@ -9,24 +9,12 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.optim import lr_scheduler
 
-import torchvision
-import torchvision.transforms as transforms
 from torchvision import datasets, models
 
-from imutils import paths
-from pathlib import Path
-import os, sys
-import time
-import copy
-import pickle
-
-import pandas as pd
-import matplotlib.pylab as plt
-import numpy as np
+import os, shutil
 
 # Local modules
 from cub_tools.train import train_model
-from cub_tools.visualize import imshow, visualize_model
 from cub_tools.utils import save_model_dict, save_model_full
 from cub_tools.transforms import makeDefaultTransforms
 
@@ -34,14 +22,21 @@ from cub_tools.transforms import makeDefaultTransforms
 # Script runtime options
 model_name = 'googlenet'
 model_func = models.googlenet
-root_dir = 'data'
-data_dir = os.path.join(root_dir,'images')
+root_dir = '../'
+data_dir = os.path.join(root_dir,'data/images')
 working_dir = os.path.join('models/classification', model_name)
+clean_up = True # Remove existing model dir before commencing
 batch_size = 16
 num_workers = 4
 num_epochs = 40
 #################################################
 
+## SETUP DIRS
+# Clean up the output directory by removing it if desired
+print('Removing existing model results directory')
+if clean_up and (os.path.exists(working_dir)):
+    shutil.rmtree(working_dir)
+# Create the output directory for results
 os.makedirs(working_dir, exist_ok=True)
 
 # Get data transforms
@@ -64,8 +59,6 @@ for dataset in dataset_sizes.keys():
 print('')
 print('Number of classes:: ', len(class_names))
 print('========================================')
-for i_class, class_name in enumerate(class_names):
-    print(i_class,':: ',class_name)
 
 
 # Setup the device to run the computations
