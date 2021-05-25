@@ -16,7 +16,7 @@ from cub_tools.utils import save_model_dict, save_model_full
 
 
 class Trainer():
-    def __init__(self, config, framework=None, model=None, device=None, optimizer=None, scheduler=None, criterion=None, train_loader=None, val_loader=None, data_transforms=None):
+    def __init__(self, config, cmd_args=None, framework=None, model=None, device=None, optimizer=None, scheduler=None, criterion=None, train_loader=None, val_loader=None, data_transforms=None):
 
         # Create status check dictionary, model will only execute training if all True.
         self.trainer_status = {
@@ -28,10 +28,14 @@ class Trainer():
             'val_loader' : False,
             'data_transforms' : False
         }
+        print('[INFO] Parameters Override:: {}'.format(cmd_args))
 
         # Load the model configuration
         self.config = get_cfg_defaults()
         self.config.merge_from_file(config)
+        # Override config from command line arguments
+        if (cmd_args is not None): #or (cmd_args == '[]') or (not cmd_args):
+            self.config.merge_from_list(cmd_args)
         # Creating correct working directories
         if framework is not None:
             self.config.DIRS.WORKING_DIR = os.path.join(self.config.DIRS.ROOT_DIR, self.config.DIRS.WORKING_DIR, framework+'_'+self.config.MODEL.MODEL_NAME)
@@ -154,6 +158,8 @@ class Trainer():
         self.train_loader, self.val_loader = create_dataloaders(
             data_transforms=self.data_transforms, 
             data_dir=self.config.DATA.DATA_DIR, 
+            train_dir=self.config.DATA.TRAIN_DIR,
+            test_dir=self.config.DATA.TEST_DIR,
             batch_size=self.config.TRAIN.BATCH_SIZE, 
             num_workers=self.config.TRAIN.NUM_WORKERS
             )
@@ -385,7 +391,7 @@ class Trainer():
 
 from ignite.engine import Events, create_supervised_trainer, create_supervised_evaluator, Engine
 from ignite.metrics import Accuracy, Loss, RunningAverage, ConfusionMatrix, Recall, Fbeta, Precision, TopKCategoricalAccuracy
-from ignite.handlers import ModelCheckpoint, EarlyStopping
+from ignite.handlers import ModelCheckpoint, EarlyStopping, Checkpoint
 from ignite.contrib.handlers.param_scheduler import LRScheduler
 from ignite.contrib.handlers.tensorboard_logger import TensorboardLogger, global_step_from_engine, WeightsHistHandler, GradsHistHandler
 from ignite.contrib.engines import common
@@ -393,9 +399,10 @@ from torch.cuda.amp import GradScaler, autocast
 class Ignite_Trainer(Trainer):
 
     
-    def __init__(self, config, framework='ignite', model=None, device=None, optimizer=None, scheduler=None, criterion=None, train_loader=None, val_loader=None, data_transforms=None):
+    def __init__(self, config, cmd_args=None, framework='ignite', model=None, device=None, optimizer=None, scheduler=None, criterion=None, train_loader=None, val_loader=None, data_transforms=None):
         super().__init__(
-            config, 
+            config,
+            cmd_args=cmd_args, 
             framework=framework,
             model=model, 
             device=device, 
@@ -634,6 +641,33 @@ class Ignite_Trainer(Trainer):
         self.train_engine.run(self.train_loader, max_epochs=self.config.TRAIN.NUM_EPOCHS)
         print('[INFO] Model training is complete.')
 
+from ignite.contrib.handlers.clearml_logger import ClearMLSaver
+class ClearML_Ignite_Trainer(Ignite_Trainer):
+
+    def create_callbacks(self):
+
+        ## SETUP CALLBACKS
+        print('[INFO] Creating callback functions for training loop...', end='')
+        # Early Stopping - stops training if the validation loss does not decrease after 5 epochs
+        handler = EarlyStopping(patience=self.config.EARLY_STOPPING_PATIENCE, score_function=score_function_loss, trainer=self.train_engine)
+        self.evaluator.add_event_handler(Events.COMPLETED, handler)
+        print('Early Stopping ({} epochs)...'.format(self.config.EARLY_STOPPING_PATIENCE), end='')        
+
+        val_checkpointer = Checkpoint(
+            {"model": self.model},
+            ClearMLSaver(),
+            n_saved=1,
+            score_function=score_function_acc,
+            score_name="val_acc",
+            filename_prefix='cub200_{}_ignite_best'.format(self.config.MODEL.MODEL_NAME),
+            global_step_transform=global_step_from_engine(self.train_engine),
+        )
+        self.evaluator.add_event_handler(Events.EPOCH_COMPLETED, val_checkpointer)
+        print('Model Checkpointing...', end='')
+        print('Done')
+
+        
+
 
 def score_function_loss(engine):
         '''
@@ -645,3 +679,5 @@ def score_function_loss(engine):
 
 def score_function_acc(engine):
     return engine.state.metrics["accuracy"]
+
+

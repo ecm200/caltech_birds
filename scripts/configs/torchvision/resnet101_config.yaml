@@ -1,0 +1,9 @@
+# my_project/config.py
+
+MODEL:
+    MODEL_LIBRARY: 'torchvision'
+    MODEL_NAME: 'resnet101'
+DIRS:
+    ROOT_DIR: '/home/edmorris/projects/image_classification/caltech_birds'
+TRAIN:
+    NUM_EPOCHS: 40
