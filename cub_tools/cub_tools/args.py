@@ -14,6 +14,12 @@ def get_parser(config_file=None):
         help='Path and name of configuration file for training. Should be a .yaml file.', 
         default=config_file)
 
+    parser.add_argument(
+        '--run_local',
+        action='store_true', 
+        default=False
+    )
+
     # Allow the overriding of configuration by command line KEY VALUE pairs
     parser.add_argument(
         "--opts",
