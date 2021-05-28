@@ -22,9 +22,9 @@ from cub_tools.transforms import makeDefaultTransforms
 # Script runtime options
 model_name = 'googlenet'
 model_func = models.googlenet
-root_dir = '../'
+root_dir = '../..'
 data_dir = os.path.join(root_dir,'data/images')
-working_dir = os.path.join('models/classification', model_name)
+working_dir = os.path.join(root_dir,'models/classification', model_name)
 clean_up = True # Remove existing model dir before commencing
 batch_size = 16
 num_workers = 4

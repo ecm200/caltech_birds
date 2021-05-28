@@ -36,9 +36,9 @@ from cub_tools.transforms import makeDefaultTransforms
 # Script runtime options
 model_name = 'swin_base_patch4_window12_384'
 model_func = timm.create_model
-root_dir = '../data'
-data_dir = os.path.join(root_dir,'images')
-working_dir = os.path.join('../models/classification', model_name)
+root_dir = '../..'
+data_dir = os.path.join(root_dir,'data/images')
+working_dir = os.path.join(root_dir,'models/classification', model_name)
 batch_size = 16
 num_workers = 4
 num_epochs = 40

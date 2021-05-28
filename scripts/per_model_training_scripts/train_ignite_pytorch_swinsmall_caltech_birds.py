@@ -44,7 +44,7 @@ with_amp = True
 with_grad_scale = False
 
 # Directory settings
-root_dir = '/home/edmorris/projects/image_classification/caltech_birds'
+root_dir = '../..'
 data_dir = os.path.join(root_dir,'data/images')
 working_dir = os.path.join(root_dir,'models/classification', 'ignite_'+model_name)
 clean_up = True

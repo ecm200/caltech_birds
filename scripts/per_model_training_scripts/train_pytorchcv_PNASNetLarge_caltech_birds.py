@@ -45,9 +45,9 @@ model_args = {'model_name' : model_name,
 model_func = ptcv_prepare_model
 is_model_torchvision = False
 
-root_dir = 'data'
-data_dir = os.path.join(root_dir,'images')
-working_dir = os.path.join('models/classification', model_name)
+root_dir = '../..'
+data_dir = os.path.join(root_dir,'data/images')
+working_dir = os.path.join(root_dir,'models/classification', model_name)
 batch_size = 16
 num_workers = 4
 num_epochs = 40

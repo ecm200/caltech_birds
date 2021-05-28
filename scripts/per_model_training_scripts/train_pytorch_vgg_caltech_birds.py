@@ -31,8 +31,8 @@ from cub_tools.transforms import makeDefaultTransforms
 # Script runtime options
 model_name = 'vgg16'
 model_func = models.vgg16
-root_dir = '/home/jupyter/caltech_birds'
-data_dir = os.path.join(root_dir,'data','images')
+root_dir = '../..'
+data_dir = os.path.join(root_dir,'data/images')
 working_dir = os.path.join(root_dir,'models/classification',model_name)
 batch_size = 16
 num_workers = 4

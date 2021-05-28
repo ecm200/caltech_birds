@@ -44,9 +44,9 @@ def load_class_names(dataset_path=''):
 # Script runtime options
 model_name = 'resnet152'
 model_func = models.resnet152
-root_dir = '../data_nabirds'
-data_dir = os.path.join(root_dir,'images_sorted')
-working_dir = os.path.join('../nabirds_models/classification', model_name)
+root_dir = '../..'
+data_dir = os.path.join(root_dir,'data_nabirds/images')
+working_dir = os.path.join(root_dir,'nabirds_models/classification', model_name)
 batch_size = 16
 num_workers = 4
 num_epochs = 40
