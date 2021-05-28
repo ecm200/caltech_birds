@@ -1,0 +1,9 @@
+# my_project/config.py
+
+MODEL:
+    MODEL_LIBRARY: 'timm'
+    MODEL_NAME: 'swin_small_patch4_window7_224'
+DIRS:
+    ROOT_DIR: '/home/edmorris/projects/image_classification/caltech_birds'
+TRAIN:
+    NUM_EPOCHS: 40

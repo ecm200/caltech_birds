@@ -6,3 +6,4 @@ nabirds_models
 *__pycache__*
 notebooks/*.html
 *.egg-info
+.vscode/*

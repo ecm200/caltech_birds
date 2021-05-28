@@ -8,9 +8,10 @@ setup(name='cub_tools',
       author_email='ecm200@gmail.com',
       license='MIT',
       packages=['cub_tools'],
+      zip_safe=False,
       install_requires=[
-            'pytorch=1.4',
-            'torchvision',
+            #'pytorch', # was set to 1.4, try latest
+            #'torchvision',
             'imutils',
             'pandas',
             'matplotlib',
@@ -19,4 +20,4 @@ setup(name='cub_tools',
             'pytorchcv',
             'scikit-image',
             'Pillow']
-      zip_safe=False)
+      )
