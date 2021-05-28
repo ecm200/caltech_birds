@@ -15,6 +15,63 @@ The repository includes a set of example notebooks which walks the user through 
 
 We round off the work flow exploration by showing how to convert the PyTorch trained model into an [ONNX (Open Neural Network eXchange)](https://onnx.ai/) format, which enables the bird species classifier to be deployed on vast array of platforms, either in the cloud or on personal devices. We test the ONNX version of the model using the ***ONNX Runtime*** and compare these predictions to the PyTorch version of the model, to show that the inference performance is the same.
 
+# Change Log
+
+## V2.0 Refactoring of training scripts to use YACS YAML configuration files
+
+Training scripts have been completely refactored to use a new Trainer class implementation.
+
+### YACS YAML config files
+
+All configuration and parameters for the model training is now done through YAML configuration files to specify the model configuration.
+
+Examples can be found _scripts/configs_ for the 3 model libraries that are supported by the _cub_tools_ package.
+
+For a complete list of configuration fields, see _cub_tools/cub_tools/config.py_.
+
+```yaml
+# my_project/config.py
+
+MODEL:
+    MODEL_LIBRARY: 'timm'
+    MODEL_NAME: 'resnext101_32x8d'
+DIRS:
+    ROOT_DIR: '/home/edmorris/projects/image_classification/caltech_birds'
+TRAIN:
+    NUM_EPOCHS: 40
+```
+
+### New training scripts
+
+Models are trainined by calling the training script and specifying the configuration script.
+
+To train a ResNeXt101_32x8d from the TIMM library, the command run from the scripts directory would be as follows:
+
+```shell
+python train_pytorch_caltech_birds.py --config configs/timm/resnext101_32x8d_config.yaml
+```
+
+An addition to this release is the integration of PyTorch Ignite training framework to give additional training information. The following features have been implemented.
+   1. **Tensorboard logging**. To monitor, simply start Tensorboard with the logging directory watching the models/ directory.
+   2. **Model checkpointing**. Saves out the best model after each iteration.
+   3. **Early Stopping**. Terminates training if the loss does not improve after a specified number of iterations.
+
+To use these extra features enabled by the PyTorch Ignite framework, run the following:
+
+```shell
+python train_pytorch_ignite_caltech_birds.py --config configs/timm/resnext101_32x8d_config.yaml
+```
+
+The open-source MLOps system ClearML enables the logging and remote execution of machine learning experiments. It logs everything about a model training, including code status (from the repository), environment dependencies, data and model versions and also training metrics and outputs in an easy to use web based GUI. A version of the training script has been developed to be able to deploy model training via the ClearML system. Note, this version uses Ignite as the framework integrates with ClearML to log training metrics out of the box.
+
+```shell
+python train_clearml_pytorch_ignite_caltech_birds.py --config configs/timm/resnext101_32x8d_config.yaml
+```
+
+## V1.0 Initial Release
+
+Release of the workshop material with per model training scripts.
+
 
 # Dataset details and data
 
