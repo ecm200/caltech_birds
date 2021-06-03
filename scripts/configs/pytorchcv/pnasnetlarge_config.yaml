@@ -1,0 +1,15 @@
+# my_project/config.py
+
+MODEL:
+    MODEL_LIBRARY: 'pytorchcv'
+    MODEL_NAME: 'pnasnet5large'
+DIRS:
+    ROOT_DIR: '/home/edmorris/projects/image_classification/caltech_birds'
+TRAIN:
+    NUM_EPOCHS: 40
+DATA:
+    TRANSFORMS:
+        PARAMS:
+            DEFAULT:
+                img_crop_size: 331
+                img_resize: 512

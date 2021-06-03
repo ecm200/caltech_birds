@@ -2,6 +2,7 @@ from __future__ import print_function, division
 
 import os
 import shutil
+from torchsummary import summary
 
 import torch
 import torch.nn as nn
@@ -186,7 +187,10 @@ class Trainer():
 
         elif self.config.MODEL.MODEL_LIBRARY == 'pytorchcv':
             # Change output classifier to be the number of classes in the current problem.
-            self.model.output.fc = nn.Linear(self.model.output.fc.in_features, self.config.DATA.NUM_CLASSES)
+            if isinstance(self.model.output, torch.nn.Linear):
+                self.model.output = nn.Linear(self.model.output.in_features, self.config.DATA.NUM_CLASSES)
+            elif isinstance(self.model.output.fc, torch.nn.Linear):
+                self.model.output.fc = nn.Linear(self.model.output.fc.in_features, self.config.DATA.NUM_CLASSES)
 
             
         # Send the model to the computation device    
@@ -195,6 +199,9 @@ class Trainer():
         self.trainer_status['model'] = True
 
         print('[INFO] Successfully created model and pushed it to the device {}'.format(self.device))
+
+        # Print summary of model
+        summary(self.model, batch_size=self.config.TRAIN.BATCH_SIZE, input_size=( 3, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size))
 
     def create_optimizer(self):
 
@@ -666,6 +673,64 @@ class ClearML_Ignite_Trainer(Ignite_Trainer):
         print('Model Checkpointing...', end='')
         print('Done')
 
+    
+    def create_config_pbtxt(self, config_pbtxt_file=None):
+
+        platform = "pytorch_libtorch"
+        if self.config.MODEL.MODEL_LIBRARY == 'pytorchcv':
+            input_name = 'input_layer'
+            output_name = 'output_layer'
+            input_data_type = "TYPE_FP32"
+            output_data_type = "TYPE_FP32"
+            input_dims = "[ 3, {}, {} ]".format(self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size)
+            if isinstance(self.model.output, torch.nn.Linear):
+                output_dims = "[ "+str(self.model.output.out_features).replace("None", "-1")+" ]"
+            elif isinstance(self.model.output.fc, torch.nn.Linear):
+                output_dims = "[ "+str(self.model.output.fc.out_features).replace("None", "-1")+" ]"
+
+        elif self.config.MODEL.MODEL_LIBRARY == 'timm':
+            input_name = 'input_layer'
+            output_name = self.model.default_cfg['classifier']
+            input_data_type = "TYPE_FP32"
+            output_data_type = "TYPE_FP32"
+            input_dims = "[ 3, {}, {} ]".format(self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size)
+            output_dims = "[ "+str(self.model.get_classifier().out_features).replace("None", "-1")+" ]"
+
+        elif self.config.MODEL.MODEL_LIBRARY == 'torchvision':
+            input_name = 'input_layer'
+            output_name = 'fc'
+            input_data_type = "TYPE_FP32"
+            output_data_type = "TYPE_FP32"
+            input_dims = "[ 3, {}, {} ]".format(self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size)
+            output_dims = "[ "+str(self.model.fc.out_features).replace("None", "-1")+" ]"
+
+
+        self.config_pbtxt = """
+            platform: "%s"
+            input [
+                {
+                    name: "%s"
+                    data_type: %s
+                    dims: %s
+                }
+            ]
+            output [
+                {
+                    name: "%s"
+                    data_type: %s
+                    dims: %s
+                }
+            ]
+        """ % (
+            platform,
+            input_name, input_data_type, input_dims,
+            output_name, output_data_type, output_dims
+        )
+
+        if config_pbtxt_file is not None:
+            with open(config_pbtxt_file, "w") as config_file:
+                config_file.write(self.config_pbtxt)
+
         
 
 
@@ -679,5 +744,8 @@ def score_function_loss(engine):
 
 def score_function_acc(engine):
     return engine.state.metrics["accuracy"]
+
+
+
 
 

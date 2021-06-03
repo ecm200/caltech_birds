@@ -2,16 +2,16 @@
 # coding: utf-8
 
 from __future__ import print_function, division
-import os, pathlib
+import pathlib
 
 # Clear ML experiment
-from clearml import Task, StorageManager, Dataset
-import yacs
+from clearml import Task, Dataset
 
 # Local modules
-from cub_tools.trainer import Ignite_Trainer, ClearML_Ignite_Trainer
+from cub_tools.trainer import ClearML_Ignite_Trainer
 from cub_tools.args import get_parser
 from cub_tools.config import get_cfg_defaults, get_key_value_dict
+
 
 # Get the arguments from the command line, including configuration file and any overrides.
 parser = get_parser()
@@ -34,7 +34,7 @@ params = get_key_value_dict(cfg)
 
 # Connecting with the ClearML process
 # First add the repo package requirements that aren't on CONDA / PYPI
-Task.add_requirements('git+https://github.com/ecm200/caltech_birds.git@clearml_integrations#egg=cub_tools&subdirectory=cub_tools/')
+Task.add_requirements('git+https://github.com/ecm200/caltech_birds.git@clearml_dev#egg=cub_tools&subdirectory=cub_tools/')
 Task.add_requirements('git+https://github.com/rwightman/pytorch-image-models.git')
 # Now connect the script to ClearML Server as an experiment.
 task = Task.init(
@@ -43,6 +43,9 @@ task = Task.init(
     task_type=Task.TaskTypes.training,
     output_uri='azure://clearmllibrary/artefacts'
     )
+
+# Add tags to the experiment to show in the ClearML GUI for better grouping
+task.add_tags(['CUB200', cfg.MODEL.MODEL_NAME, cfg.MODEL.MODEL_LIBRARY, 'PyTorch', 'Ignite', 'Deployable', 'Azure Blob Storage'])
 
 # Setup ability to add configuration parameters control.
 # Pass the YACS configuration object directly to task object for storting of all parameters with model on clearml-server
@@ -111,10 +114,17 @@ print('[INFO] Creating optimizer...')
 trainer.create_optimizer()
 
 # Setup the scheduler
+print('[INFO] Creating LR Scheduler...')
 trainer.create_scheduler()
 
 # Train the model
+print('[INFO] Training the model...')
 trainer.run()
+
+# Create the deployment script and add it to the experiment.
+print('[INFO] Creating deployment configuration...')
+trainer.create_config_pbtxt(config_pbtxt_file='config.pbtxt')
+task.connect_configuration(configuration=pathlib.Path('config.pbtxt'), name='config.pbtxt')
 
 ## Save the best model
 #trainer.save_best_model()
