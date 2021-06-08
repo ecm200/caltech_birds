@@ -564,7 +564,7 @@ class Ignite_Trainer(Trainer):
         print('done')
 
 
-    def create_callbacks(self):
+    def create_callbacks(self, best_model_only=True):
 
         ## SETUP CALLBACKS
         print('[INFO] Creating callback functions for training loop...', end='')
@@ -573,31 +573,36 @@ class Ignite_Trainer(Trainer):
         self.evaluator.add_event_handler(Events.COMPLETED, handler)
         print('Early Stopping ({} epochs)...'.format(self.config.EARLY_STOPPING_PATIENCE), end='')
 
-        # Checkpoint the model
-        # iteration checkpointer
-        checkpointer = ModelCheckpoint(
-            dirname=self.config.DIRS.WORKING_DIR, 
-            filename_prefix='caltech_birds_ignite', 
-            n_saved=2, 
-            create_dir=True, 
-            save_as_state_dict=True, 
-            require_empty=False
-            )
-        self.train_engine.add_event_handler(Events.EPOCH_COMPLETED, checkpointer, {self.config.MODEL.MODEL_NAME: self.model})
-        # best model checkpointer, based on validation accuracy.
-        val_checkpointer = ModelCheckpoint(
-            dirname=self.config.DIRS.WORKING_DIR, 
-            filename_prefix='caltech_birds_ignite_best', 
-            score_function=score_function_acc,
-            score_name='val_acc',
-            n_saved=2, 
-            create_dir=True, 
-            save_as_state_dict=True, 
-            require_empty=False,
-            global_step_transform=global_step_from_engine(self.train_engine)
-            )
-        self.evaluator.add_event_handler(Events.COMPLETED, val_checkpointer, {self.config.MODEL.MODEL_NAME: self.model})
         print('Model Checkpointing...', end='')
+        if best_model_only:
+            print('best model checkpointing...', end='')
+        # best model checkpointer, based on validation accuracy.
+            val_checkpointer = ModelCheckpoint(
+                dirname=self.config.DIRS.WORKING_DIR, 
+                filename_prefix='caltech_birds_ignite_best', 
+                score_function=score_function_acc,
+                score_name='val_acc',
+                n_saved=2, 
+                create_dir=True, 
+                save_as_state_dict=True, 
+                require_empty=False,
+                global_step_transform=global_step_from_engine(self.train_engine)
+                )
+            self.evaluator.add_event_handler(Events.COMPLETED, val_checkpointer, {self.config.MODEL.MODEL_NAME: self.model})
+        else:
+            # Checkpoint the model
+            # iteration checkpointer
+            print('every iteration model checkpointing...', end='')
+            checkpointer = ModelCheckpoint(
+                dirname=self.config.DIRS.WORKING_DIR, 
+                filename_prefix='caltech_birds_ignite', 
+                n_saved=2, 
+                create_dir=True, 
+                save_as_state_dict=True, 
+                require_empty=False
+                )
+            self.train_engine.add_event_handler(Events.EPOCH_COMPLETED, checkpointer, {self.config.MODEL.MODEL_NAME: self.model})
+        
         print('Done')
 
 
