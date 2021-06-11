@@ -185,5 +185,7 @@ print('[INFO] Creating deployment configuration...')
 trainer.create_config_pbtxt(config_pbtxt_file='config.pbtxt')
 task.connect_configuration(configuration=pathlib.Path('config.pbtxt'), name='config.pbtxt')
 
+# NOTE: Placeholder here, call conversion to torchscript and save to file, and upload to clearml-server / remote storage.
+
 ## Save the best model
 #trainer.save_best_model()
