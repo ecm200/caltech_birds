@@ -4,6 +4,8 @@ import os
 import shutil
 import tempfile
 import datetime
+import pathlib
+import furl
 
 from torchsummary import summary
 
@@ -420,8 +422,7 @@ from ignite.contrib.engines import common
 from torch.cuda.amp import GradScaler, autocast
 class Ignite_Trainer(Trainer):
 
-    
-    def __init__(self, task, config=None, cmd_args=None, framework='ignite', model=None, device=None, optimizer=None, scheduler=None, criterion=None, train_loader=None, val_loader=None, data_transforms=None):
+    def __init__(self, config=None, cmd_args=None, framework='ignite', model=None, device=None, optimizer=None, scheduler=None, criterion=None, train_loader=None, val_loader=None, data_transforms=None):
         super().__init__(
             config=config,
             cmd_args=cmd_args, 
@@ -440,7 +441,6 @@ class Ignite_Trainer(Trainer):
         self.evaluator = None
         self.train_evaluator = None
         self.tb_logger = None
-        self.task = task
 
     
     
@@ -696,7 +696,25 @@ class Ignite_Trainer(Trainer):
 
 
 from ignite.contrib.handlers.clearml_logger import ClearMLSaver
+from clearml import OutputModel
 class ClearML_Ignite_Trainer(Ignite_Trainer):
+
+    def __init__(self, task, config=None, cmd_args=None, framework='ignite', model=None, device=None, optimizer=None, scheduler=None, criterion=None, train_loader=None, val_loader=None, data_transforms=None):
+        super().__init__(
+            config=config,
+            cmd_args=cmd_args, 
+            framework=framework,
+            model=model, 
+            device=device, 
+            optimizer=optimizer, 
+            scheduler=scheduler, 
+            criterion=criterion, 
+            train_loader=train_loader, 
+            val_loader=val_loader, 
+            data_transforms=data_transforms
+            )
+        
+        self.task = task
 
     def create_callbacks(self):
 
@@ -795,6 +813,18 @@ class ClearML_Ignite_Trainer(Ignite_Trainer):
         
         if dirname is None:
             dirname = tempfile.mkdtemp(prefix=f"ignite_torchscripts_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S_')}")
+        temp_file_path = os.path.join(dirname,'model.pt')
+
+        # Get the best model weights file for this experiment
+        for chkpnt_model in self.task.get_models()['output']:
+            print(chkpnt_model.name)
+            print(chkpnt_model.url)
+            if "best_model" in chkpnt_model.name:
+                break
+        
+        # Get the model weights file locally and update the model
+        local_cache_path = chkpnt_model.get_local_copy()
+        self.update_model_from_checkpoint(checkpoint_file=local_cache_path)
 
         # Create an image batch
         X, y = next(iter(self.val_loader))
@@ -803,7 +833,32 @@ class ClearML_Ignite_Trainer(Ignite_Trainer):
         # Trace the model
         traced_module = torch.jit.trace(self.model, (X))
         # Write the trace module of the model to disk
-        traced_module.save('model.pt') ### TODO: Need to work out where this is saved, and how to push to an artefact.
+        traced_module.save(temp_file_path) ### TODO: Need to work out where this is saved, and how to push to an artefact.
+
+        # Build the remote location of the torchscript file, based on the best model weights
+        # Create furl object of existing model weights
+        model_furl = furl.furl(chkpnt_model.url)
+        # Strip off the model path
+        model_path = pathlib.Path(model_furl.pathstr)
+        # Get the existing model weights name, and split the name from the file extension.
+        file_split = os.path.splitext(model_path.name)
+        # Create the torchscript filename
+        if fname is None:
+            fname = file_split[0]+"_torchscript"+file_split[1]
+        # Construct the new full uri with the new filename
+        new_model_furl = furl.furl(origin=model_furl.origin, path=str(model_path.parent))
+
+        # Upload the torchscript model file to the clearml-server
+        new_output_model = OutputModel(task=self.task)
+        new_output_model.update_weights(
+            weights_filename=temp_file_path,
+            target_filename=fname,
+            upload_uri=new_model_furl.url
+            )
+
+        
+
+
         
 
 
