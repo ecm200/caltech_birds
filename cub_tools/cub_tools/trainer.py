@@ -19,6 +19,7 @@ from cub_tools.utils import save_model_dict, save_model_full
 class Trainer():
     def __init__(self, config, cmd_args=None, framework=None, model=None, device=None, optimizer=None, scheduler=None, criterion=None, train_loader=None, val_loader=None, data_transforms=None):
 
+        assert (config is not None) and (cmd_args is not None), '[ERROR] Configuration not found. You must specify at least a configuration [config] or a param value pair list [cmd_args], or both and have them merged.'
         # Create status check dictionary, model will only execute training if all True.
         self.trainer_status = {
             'model' : False,
@@ -31,9 +32,14 @@ class Trainer():
         }
         print('[INFO] Parameters Override:: {}'.format(cmd_args))
 
-        # Load the model configuration
+        # LOAD CONFIGURATION
+        # Configuration can be provided by YAML file or key value pair list, or both.
+        # NOTE: key value pair list take precedent over YAML file.
+        # Load the default model configuration.
         self.config = get_cfg_defaults()
-        self.config.merge_from_file(config)
+        # Load configuration from YAML file if it is provided and overide defaults.
+        if (config is not None):
+            self.config.merge_from_file(config)
         # Override config from command line arguments
         if (cmd_args is not None): #or (cmd_args == '[]') or (not cmd_args):
             self.config.merge_from_list(cmd_args)
@@ -152,7 +158,7 @@ class Trainer():
         self.trainer_status['data_transforms'] = True
 
     # Default dataloader creation
-    def create_dataloaders(self):
+    def create_dataloaders(self, shuffle=None):
 
         assert self.trainer_status['data_transforms'], '[ERROR] You need to specify data transformers to create data loaders.'
         
@@ -162,7 +168,8 @@ class Trainer():
             train_dir=self.config.DATA.TRAIN_DIR,
             test_dir=self.config.DATA.TEST_DIR,
             batch_size=self.config.TRAIN.BATCH_SIZE, 
-            num_workers=self.config.TRAIN.NUM_WORKERS
+            num_workers=self.config.TRAIN.NUM_WORKERS,
+            shuffle=shuffle
             )
         self.dataset_sizes = {
             'train' : len(self.train_loader.dataset.imgs),
@@ -171,7 +178,7 @@ class Trainer():
         self.trainer_status['train_loader'] = True
         self.trainer_status['val_loader'] = True
 
-    def create_model(self, model_func=None, model_args=None):
+    def create_model(self, model_func=None, model_args=None, load_to_device=True):
 
         if model_func is None:
             assert self.model_func is not None, '[ERROR] You must specify a model library loading function.'
@@ -193,15 +200,20 @@ class Trainer():
                 self.model.output.fc = nn.Linear(self.model.output.fc.in_features, self.config.DATA.NUM_CLASSES)
 
             
-        # Send the model to the computation device    
-        self.model.to(self.device)
+        # Send the model to the computation device 
+        if load_to_device:   
+            self.model.to(self.device)
+            print('[INFO] Successfully created model and pushed it to the device {}'.format(self.device))
+            # Print summary of model
+            summary(self.model, batch_size=self.config.TRAIN.BATCH_SIZE, input_size=( 3, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size))
+        else:
+            print('[INFO] Successfully created model but NOT pushed it to the device {}'.format(self.device))
+            # Print summary of model
+            summary(self.model, device='cpu', batch_size=self.config.TRAIN.BATCH_SIZE, input_size=( 3, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size))
 
         self.trainer_status['model'] = True
 
-        print('[INFO] Successfully created model and pushed it to the device {}'.format(self.device))
-
-        # Print summary of model
-        summary(self.model, batch_size=self.config.TRAIN.BATCH_SIZE, input_size=( 3, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size))
+        
 
     def create_optimizer(self):
 
@@ -653,6 +665,32 @@ class Ignite_Trainer(Trainer):
         self.train_engine.run(self.train_loader, max_epochs=self.config.TRAIN.NUM_EPOCHS)
         print('[INFO] Model training is complete.')
 
+    def update_model_from_checkpoint(self, checkpoint_file=None, load_to_device=True):
+        '''
+        Function to take a saved checkpoint of the models weights, and load it into the model.
+        '''
+        assert self.trainer_status['model'], '[ERROR] You must create the model to load the weights. Use Trainer.create_model() method to first create your model, then load weights.'
+        assert checkpoint_file is not None, '[ERROR] You must provide the full path and name of the .pt file containing the saved weights of the model you want to update.'
+
+        try:
+            # Load the weights of the checkpointed model from the PT file
+            self.model.load_state_dict(torch.load(f=checkpoint_file))
+        except:
+            raise Exception('[ERROR] Something went wrong with loading the weights into the model.')
+        else:
+            print('[INFO] Successfully loaded weights into the model from weights file:: {}'.format(checkpoint_file))
+
+        if load_to_device:
+            self.model.to(self.device)
+            print('[INFO] Successfully updated model and pushed it to the device {}'.format(self.device))
+            # Print summary of model
+            summary(self.model, batch_size=self.config.TRAIN.BATCH_SIZE, input_size=( 3, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size))
+        else:
+            print('[INFO] Successfully updated model but NOT pushed it to the device {}'.format(self.device))
+            # Print summary of model
+            summary(self.model, device='cpu', batch_size=self.config.TRAIN.BATCH_SIZE, input_size=( 3, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size))
+
+
 from ignite.contrib.handlers.clearml_logger import ClearMLSaver
 class ClearML_Ignite_Trainer(Ignite_Trainer):
 
@@ -682,32 +720,34 @@ class ClearML_Ignite_Trainer(Ignite_Trainer):
     def create_config_pbtxt(self, config_pbtxt_file=None):
 
         platform = "pytorch_libtorch"
-        if self.config.MODEL.MODEL_LIBRARY == 'pytorchcv':
-            input_name = 'input_layer'
-            output_name = 'output_layer'
-            input_data_type = "TYPE_FP32"
-            output_data_type = "TYPE_FP32"
-            input_dims = "[ 3, {}, {} ]".format(self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size)
-            if isinstance(self.model.output, torch.nn.Linear):
-                output_dims = "[ "+str(self.model.output.out_features).replace("None", "-1")+" ]"
-            elif isinstance(self.model.output.fc, torch.nn.Linear):
-                output_dims = "[ "+str(self.model.output.fc.out_features).replace("None", "-1")+" ]"
-
-        elif self.config.MODEL.MODEL_LIBRARY == 'timm':
-            input_name = 'input_layer'
-            output_name = self.model.default_cfg['classifier']
-            input_data_type = "TYPE_FP32"
-            output_data_type = "TYPE_FP32"
-            input_dims = "[ 3, {}, {} ]".format(self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size)
-            output_dims = "[ "+str(self.model.get_classifier().out_features).replace("None", "-1")+" ]"
-
-        elif self.config.MODEL.MODEL_LIBRARY == 'torchvision':
-            input_name = 'input_layer'
-            output_name = 'fc'
-            input_data_type = "TYPE_FP32"
-            output_data_type = "TYPE_FP32"
-            input_dims = "[ 3, {}, {} ]".format(self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size)
-            output_dims = "[ "+str(self.model.fc.out_features).replace("None", "-1")+" ]"
+        input_name = 'INPUT__0'
+        output_name = 'OUTPUT__0'
+        input_data_type = "TYPE_FP32"
+        output_data_type = "TYPE_FP32"
+        input_dims = [-1, 3, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size] # "[ -1, 3, {}, {} ]".format(self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size)
+        output_dims = [-1, self.config.DATA.NUM_CLASSES]
+        
+        #if self.config.MODEL.MODEL_LIBRARY == 'pytorchcv':
+        #    if isinstance(self.model.output, torch.nn.Linear):
+        #        output_dims = "[ "+str(self.model.output.out_features).replace("None", "-1")+" ]"
+        #    elif isinstance(self.model.output.fc, torch.nn.Linear):
+        #        output_dims = "[ "+str(self.model.output.fc.out_features).replace("None", "-1")+" ]"
+        #
+        # elif self.config.MODEL.MODEL_LIBRARY == 'timm':
+        #     input_name = 'input_layer'
+        #     output_name = self.model.default_cfg['classifier']
+        #     input_data_type = "TYPE_FP32"
+        #     output_data_type = "TYPE_FP32"
+        #     input_dims = "[ 3, {}, {} ]".format(self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size)
+        #     output_dims = "[ "+str(self.model.get_classifier().out_features).replace("None", "-1")+" ]"
+        #
+        # elif self.config.MODEL.MODEL_LIBRARY == 'torchvision':
+        #     input_name = 'input_layer'
+        #     output_name = 'fc'
+        #     input_data_type = "TYPE_FP32"
+        #     output_data_type = "TYPE_FP32"
+        #     input_dims = "[ 3, {}, {} ]".format(self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size)
+        #     output_dims = "[ "+str(self.model.fc.out_features).replace("None", "-1")+" ]"
 
 
         self.config_pbtxt = """
@@ -717,6 +757,9 @@ class ClearML_Ignite_Trainer(Ignite_Trainer):
                     name: "%s"
                     data_type: %s
                     dims: %s
+                    dims: %s
+                    dims: %s
+                    dims: %s
                 }
             ]
             output [
@@ -724,18 +767,33 @@ class ClearML_Ignite_Trainer(Ignite_Trainer):
                     name: "%s"
                     data_type: %s
                     dims: %s
+                    dims: %s
                 }
             ]
         """ % (
             platform,
-            input_name, input_data_type, input_dims,
-            output_name, output_data_type, output_dims
+            input_name, input_data_type, 
+            str(input_dims[0]), str(input_dims[1]), str(input_dims[2]), str(input_dims[3]),
+            output_name, output_data_type, str(output_dims[0]), str(output_dims[1])
         )
 
         if config_pbtxt_file is not None:
             with open(config_pbtxt_file, "w") as config_file:
                 config_file.write(self.config_pbtxt)
 
+
+    def trace_model_for_torchscript(self):
+        '''
+        Function for tracing models to Torchscript.
+        '''
+        # Create an image batch
+        X, y = next(iter(self.val_loader))
+        # Push the input images to the device
+        X = X.to(self.device)
+        # Trace the model
+        traced_module = torch.jit.trace(self.model, (X))
+        # Write the trace module of the model to disk
+        traced_module.save('model.pt') ### TODO: Need to work out where this is saved, and how to push to an artefact.
         
 
 
