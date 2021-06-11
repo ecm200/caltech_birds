@@ -2,6 +2,9 @@ from __future__ import print_function, division
 
 import os
 import shutil
+import tempfile
+import datetime
+
 from torchsummary import summary
 
 import torch
@@ -17,7 +20,7 @@ from cub_tools.utils import save_model_dict, save_model_full
 
 
 class Trainer():
-    def __init__(self, config, cmd_args=None, framework=None, model=None, device=None, optimizer=None, scheduler=None, criterion=None, train_loader=None, val_loader=None, data_transforms=None):
+    def __init__(self, config=None, cmd_args=None, framework=None, model=None, device=None, optimizer=None, scheduler=None, criterion=None, train_loader=None, val_loader=None, data_transforms=None):
 
         assert (config is not None) and (cmd_args is not None), '[ERROR] Configuration not found. You must specify at least a configuration [config] or a param value pair list [cmd_args], or both and have them merged.'
         # Create status check dictionary, model will only execute training if all True.
@@ -418,9 +421,9 @@ from torch.cuda.amp import GradScaler, autocast
 class Ignite_Trainer(Trainer):
 
     
-    def __init__(self, config, cmd_args=None, framework='ignite', model=None, device=None, optimizer=None, scheduler=None, criterion=None, train_loader=None, val_loader=None, data_transforms=None):
+    def __init__(self, task, config=None, cmd_args=None, framework='ignite', model=None, device=None, optimizer=None, scheduler=None, criterion=None, train_loader=None, val_loader=None, data_transforms=None):
         super().__init__(
-            config,
+            config=config,
             cmd_args=cmd_args, 
             framework=framework,
             model=model, 
@@ -437,6 +440,7 @@ class Ignite_Trainer(Trainer):
         self.evaluator = None
         self.train_evaluator = None
         self.tb_logger = None
+        self.task = task
 
     
     
@@ -782,10 +786,16 @@ class ClearML_Ignite_Trainer(Ignite_Trainer):
                 config_file.write(self.config_pbtxt)
 
 
-    def trace_model_for_torchscript(self):
+    def trace_model_for_torchscript(self, dirname=None, fname=None):
         '''
         Function for tracing models to Torchscript.
         '''
+        assert self.trainer_status['model'], '[ERROR] You must create the model to load the weights. Use Trainer.create_model() method to first create your model, then load weights.'
+        assert self.trainer_status['val_loader'], '[ERROR] You must create the validation loader in order to load images. Use Trainer.create_dataloaders() method to create access to image batches.'
+        
+        if dirname is None:
+            dirname = tempfile.mkdtemp(prefix=f"ignite_torchscripts_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S_')}")
+
         # Create an image batch
         X, y = next(iter(self.val_loader))
         # Push the input images to the device
