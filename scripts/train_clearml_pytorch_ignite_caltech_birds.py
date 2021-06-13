@@ -154,7 +154,7 @@ if not args.run_local:
 print('[INFO] Final parameter list passed to Trainer object:: {}'.format(params_list))
 
 # Create the trainer object
-trainer = ClearML_Ignite_Trainer(config=args.config, cmd_args=params_list) # NOTE: disabled cmd line argument passing but using it to pass ClearML configs.
+trainer = ClearML_Ignite_Trainer(task=task, config=args.config, cmd_args=params_list) # NOTE: disabled cmd line argument passing but using it to pass ClearML configs.
 
 # Setup the data transformers
 print('[INFO] Creating data transforms...')
@@ -186,6 +186,7 @@ trainer.create_config_pbtxt(config_pbtxt_file='config.pbtxt')
 task.connect_configuration(configuration=pathlib.Path('config.pbtxt'), name='config.pbtxt')
 
 # NOTE: Placeholder here, call conversion to torchscript and save to file, and upload to clearml-server / remote storage.
+trainer.trace_model_for_torchscript()
 
 ## Save the best model
 #trainer.save_best_model()
