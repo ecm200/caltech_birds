@@ -857,7 +857,7 @@ class ClearML_Ignite_Trainer(Ignite_Trainer):
         print('[INFO] Torchscript model file remote location:: {}'.format(new_model_furl.url))
         new_output_model.update_weights(
             weights_filename=temp_file_path,
-            upload_uri=new_model_furl.url
+            target_filename=fname
             )
         print('[INFO] Torchscript model file remote upload complete. Model saved to ID:: {}'.format(new_output_model.id))
 
