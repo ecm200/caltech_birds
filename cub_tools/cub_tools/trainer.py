@@ -822,7 +822,7 @@ class ClearML_Ignite_Trainer(Ignite_Trainer):
             if "best_model" in chkpnt_model.name:
                 print('[INFO] Using this model weights for creating Torchscript model.')
                 break
-        print('[INFO] Torchscript file being saved to temporary location:: {}'.format(temp_file_path))
+        
         # Get the model weights file locally and update the model
         local_cache_path = chkpnt_model.get_local_copy()
         self.update_model_from_checkpoint(checkpoint_file=local_cache_path)
@@ -834,28 +834,32 @@ class ClearML_Ignite_Trainer(Ignite_Trainer):
         # Trace the model
         traced_module = torch.jit.trace(self.model, (X))
         # Write the trace module of the model to disk
+        print('[INFO] Torchscript file being saved to temporary location:: {}'.format(temp_file_path))
         traced_module.save(temp_file_path) ### TODO: Need to work out where this is saved, and how to push to an artefact.
 
         # Build the remote location of the torchscript file, based on the best model weights
         # Create furl object of existing model weights
-        #model_furl = furl.furl(chkpnt_model.url)
+        model_furl = furl.furl(chkpnt_model.url)
         # Strip off the model path
-        #model_path = pathlib.Path(model_furl.pathstr)
+        model_path = pathlib.Path(model_furl.pathstr)
         # Get the existing model weights name, and split the name from the file extension.
-        #file_split = os.path.splitext(model_path.name)
+        file_split = os.path.splitext(model_path.name)
         # Create the torchscript filename
-        #if fname is None:
-        #    fname = file_split[0]+"_torchscript"+file_split[1]
+        if fname is None:
+            fname = file_split[0]+"_torchscript"+file_split[1]
         # Construct the new full uri with the new filename
-        #new_model_furl = furl.furl(origin=model_furl.origin, path=str(model_path.parent))
+        new_model_furl = furl.furl(origin=model_furl.origin, path=os.path.join(model_path.parent,fname))
 
         # Upload the torchscript model file to the clearml-server
-        #new_output_model = OutputModel(task=self.task)
-        #new_output_model.update_weights(
-        #    weights_filename=temp_file_path,
-        #    target_filename=fname,
-        #    upload_uri=new_model_furl.url
-        #    )
+        print('[INFO] Pushing Torchscript model as artefact to ClearML Task:: {}'.format(self.task.id))
+        new_output_model = OutputModel(task=self.task)
+        print('[INFO] Torchscript model local temporary file location:: {}'.format(temp_file_path))
+        print('[INFO] Torchscript model file remote location:: {}'.format(new_model_furl.url))
+        new_output_model.update_weights(
+            weights_filename=temp_file_path,
+            upload_uri=new_model_furl.url
+            )
+        print('[INFO] Torchscript model file remote upload complete. Model saved to ID:: {}'.format(new_output_model.id))
 
         
 
