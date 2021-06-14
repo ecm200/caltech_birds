@@ -804,12 +804,15 @@ class ClearML_Ignite_Trainer(Ignite_Trainer):
                 config_file.write(self.config_pbtxt)
 
 
-    def trace_model_for_torchscript(self, dirname=None, fname=None):
+    def trace_model_for_torchscript(self, dirname=None, fname=None, model_name_preamble=None):
         '''
         Function for tracing models to Torchscript.
         '''
         assert self.trainer_status['model'], '[ERROR] You must create the model to load the weights. Use Trainer.create_model() method to first create your model, then load weights.'
         assert self.trainer_status['val_loader'], '[ERROR] You must create the validation loader in order to load images. Use Trainer.create_dataloaders() method to create access to image batches.'
+
+        if model_name_preamble is None:
+            model_name_preamble = 'Torchscript Best Model'
         
         if dirname is None:
             dirname = tempfile.mkdtemp(prefix=f"ignite_torchscripts_{datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S_')}")
@@ -828,7 +831,7 @@ class ClearML_Ignite_Trainer(Ignite_Trainer):
         self.update_model_from_checkpoint(checkpoint_file=local_cache_path)
 
         # Create an image batch
-        X, y = next(iter(self.val_loader))
+        X, _ = next(iter(self.val_loader))
         # Push the input images to the device
         X = X.to(self.device)
         # Trace the model
@@ -852,7 +855,12 @@ class ClearML_Ignite_Trainer(Ignite_Trainer):
 
         # Upload the torchscript model file to the clearml-server
         print('[INFO] Pushing Torchscript model as artefact to ClearML Task:: {}'.format(self.task.id))
-        new_output_model = OutputModel(task=self.task)
+        new_output_model = OutputModel(
+            task=self.task, 
+            name=model_name_preamble+' '+self.task.name, 
+            tags=['Torchscript','Deployable','Best Model', 'CUB200', self.config.MODEL.MODEL_NAME, self.config.MODEL.MODEL_LIBRARY, 'PyTorch', 'Ignite', 'Azure Blob Storage']
+            )
+        print('[INFO] New Torchscript model artefact added to experiment with name:: {}'.format(new_output_model.name))
         print('[INFO] Torchscript model local temporary file location:: {}'.format(temp_file_path))
         print('[INFO] Torchscript model file remote location:: {}'.format(new_model_furl.url))
         new_output_model.update_weights(
