@@ -1,15 +1,15 @@
 # my_project/config.py
 
 MODEL:
-    MODEL_LIBRARY: 'timm'
-    MODEL_NAME: 'resnet101d'
+    MODEL_LIBRARY: 'pytorchcv'
+    MODEL_NAME: 'efficientnet_b5'
 DIRS:
     ROOT_DIR: '/home/edmorris/projects/image_classification/caltech_birds'
 TRAIN:
     NUM_EPOCHS: 40
-DATA: 
+DATA:
     TRANSFORMS:
         PARAMS:
             DEFAULT:
-                img_crop_size: 256
-                img_resize: 256
+                img_crop_size: 456
+                img_resize: 512

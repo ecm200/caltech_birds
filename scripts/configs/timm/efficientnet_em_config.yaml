@@ -2,7 +2,7 @@
 
 MODEL:
     MODEL_LIBRARY: 'timm'
-    MODEL_NAME: 'resnet101d'
+    MODEL_NAME: 'efficientnet_em'
 DIRS:
     ROOT_DIR: '/home/edmorris/projects/image_classification/caltech_birds'
 TRAIN:
@@ -11,5 +11,5 @@ DATA:
     TRANSFORMS:
         PARAMS:
             DEFAULT:
-                img_crop_size: 256
+                img_crop_size: 240
                 img_resize: 256
