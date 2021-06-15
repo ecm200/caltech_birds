@@ -693,6 +693,42 @@ class Ignite_Trainer(Trainer):
             print('[INFO] Successfully updated model but NOT pushed it to the device {}'.format(self.device))
             # Print summary of model
             summary(self.model, device='cpu', batch_size=self.config.TRAIN.BATCH_SIZE, input_size=( 3, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size))
+        
+    def convert_to_torchscript(self, checkpoint_file=None, torchscript_model_path=None, method='trace', return_jit_model=False):
+
+        assert self.trainer_status['model'], '[ERROR] You must create the model to load the weights. Use Trainer.create_model() method to first create your model, then load weights.'
+        assert checkpoint_file is not None, '[ERROR] You must provide the path and name of a PyTorch Ignite checkpoint file of model weights [checkpoint_file].'
+
+        # Update the Trainer class attribute model with model weights file
+        self.update_model_from_checkpoint(checkpoint_file=checkpoint_file)
+
+        if torchscript_model_path is None:
+            torchscript_model_path = os.path.join(os.getcwd(),'torchscript_model.pt')
+
+        if method == 'trace':
+            assert self.trainer_status['val_loader'], '[ERROR] You must create the validation loader in order to load images. Use Trainer.create_dataloaders() method to create access to image batches.'
+
+            # Create an image batch
+            X, _ = next(iter(self.val_loader))
+            # Push the input images to the device
+            X = X.to(self.device)
+            # Trace the model
+            jit_model = torch.jit.trace(self.model, (X))
+            # Write the trace module of the model to disk
+            print('[INFO] Torchscript file being saved to temporary location:: {}'.format(torchscript_model_path))
+            jit_model.save(torchscript_model_path)
+
+        elif method == 'script':
+            # Trace the model
+            jit_model = torch.jit.script(self.model)
+            # Write the trace module of the model to disk
+            print('[INFO] Torchscript file being saved to temporary location:: {}'.format(temp_file_path))
+            jit_model.save(temp_file_path)
+
+
+        if return_jit_model:
+            return jit_model
+
 
 
 from ignite.contrib.handlers.clearml_logger import ClearMLSaver
@@ -828,17 +864,9 @@ class ClearML_Ignite_Trainer(Ignite_Trainer):
         
         # Get the model weights file locally and update the model
         local_cache_path = chkpnt_model.get_local_copy()
-        self.update_model_from_checkpoint(checkpoint_file=local_cache_path)
 
-        # Create an image batch
-        X, _ = next(iter(self.val_loader))
-        # Push the input images to the device
-        X = X.to(self.device)
-        # Trace the model
-        traced_module = torch.jit.trace(self.model, (X))
-        # Write the trace module of the model to disk
-        print('[INFO] Torchscript file being saved to temporary location:: {}'.format(temp_file_path))
-        traced_module.save(temp_file_path) ### TODO: Need to work out where this is saved, and how to push to an artefact.
+        # Convert the model to Torchscript
+        self.convert_to_torchscript(checkpoint_file=local_cache_path, torchscript_model_path=local_cache_path, method='trace', return_jit_model=False)
 
         # Build the remote location of the torchscript file, based on the best model weights
         # Create furl object of existing model weights
