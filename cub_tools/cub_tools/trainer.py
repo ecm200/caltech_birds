@@ -722,8 +722,8 @@ class Ignite_Trainer(Trainer):
             # Trace the model
             jit_model = torch.jit.script(self.model)
             # Write the trace module of the model to disk
-            print('[INFO] Torchscript file being saved to temporary location:: {}'.format(temp_file_path))
-            jit_model.save(temp_file_path)
+            print('[INFO] Torchscript file being saved to temporary location:: {}'.format(torchscript_model_path))
+            jit_model.save(torchscript_model_path)
 
 
         if return_jit_model:
@@ -866,7 +866,7 @@ class ClearML_Ignite_Trainer(Ignite_Trainer):
         local_cache_path = chkpnt_model.get_local_copy()
 
         # Convert the model to Torchscript
-        self.convert_to_torchscript(checkpoint_file=local_cache_path, torchscript_model_path=local_cache_path, method='trace', return_jit_model=False)
+        self.convert_to_torchscript(checkpoint_file=local_cache_path, torchscript_model_path=temp_file_path, method='trace', return_jit_model=False)
 
         # Build the remote location of the torchscript file, based on the best model weights
         # Create furl object of existing model weights

@@ -66,6 +66,13 @@ parser.add_argument(
     help='Name of the ClearML-Server queue that the task will be enqueded with for remote execution. Use "none" for no queuing of job. Default [gpu]', 
     default='gpu')
 
+parser.add_argument(
+    '--clearml-experiment-name',
+    dest='clearml_experiment_name',
+    type=str,
+    help=' Preamble of name of the ClearML experiment that you want the experiment to be logged in. []', 
+    default='')
+
 parser.print_help()
 args = parser.parse_args()
 
@@ -94,7 +101,7 @@ Task.add_requirements('git+https://github.com/rwightman/pytorch-image-models.git
 # Now connect the script to ClearML Server as an experiment.
 task = Task.init(
     project_name=args.clearml_project,
-    task_name='TRAIN [Network: '+cfg.MODEL.MODEL_NAME+', Library: '+cfg.MODEL.MODEL_LIBRARY+'] Ignite Train PyTorch CNN on CUB200', 
+    task_name=args.clearml_experiment_name+'TRAIN [Network: '+cfg.MODEL.MODEL_NAME+', Library: '+cfg.MODEL.MODEL_LIBRARY+'] Ignite Train PyTorch CNN on CUB200', 
     task_type=Task.TaskTypes.training,
     output_uri=args.clearml_output_url
     )
