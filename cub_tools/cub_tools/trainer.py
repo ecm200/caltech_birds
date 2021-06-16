@@ -6,6 +6,7 @@ import tempfile
 import datetime
 import pathlib
 import furl
+import numpy as np
 
 from torchsummary import summary
 
@@ -24,7 +25,7 @@ from cub_tools.utils import save_model_dict, save_model_full
 class Trainer():
     def __init__(self, config=None, cmd_args=None, framework=None, model=None, device=None, optimizer=None, scheduler=None, criterion=None, train_loader=None, val_loader=None, data_transforms=None):
 
-        assert (config is not None) and (cmd_args is not None), '[ERROR] Configuration not found. You must specify at least a configuration [config] or a param value pair list [cmd_args], or both and have them merged.'
+        #assert ((config is not None) and (cmd_args is not None)), '[ERROR] Configuration not found. You must specify at least a configuration [config] or a param value pair list [cmd_args], or both and have them merged.'
         # Create status check dictionary, model will only execute training if all True.
         self.trainer_status = {
             'model' : False,
@@ -146,7 +147,14 @@ class Trainer():
             self.trainer_status['criterion'] = True
         
         if scheduler is None:
-            self.scheduler_args = dict(self.config.TRAIN.SCHEDULER.PARAMS)
+            #self.scheduler_args = dict(self.config.TRAIN.SCHEDULER.PARAMS)
+            
+            # Take key var paired list of scheduler parameters and turn into dictionary
+            self.scheduler_args = {}
+            for i in np.arange(0,len(self.config.TRAIN.SCHEDULER.PARAMS),2):
+                self.scheduler_args[self.config.TRAIN.SCHEDULER.PARAMS[i]] = self.config.TRAIN.SCHEDULER.PARAMS[i+1]
+
+            # Get the right scheduler based on the config argument
             if self.config.TRAIN.SCHEDULER.TYPE == 'StepLR':
                 self.scheduler = torch_scheduler.StepLR
             elif self.config.TRAIN.SCHEDULER.TYPE == 'MultiStepLR':

@@ -6,7 +6,10 @@ MODEL:
 DIRS:
     ROOT_DIR: '/home/edmorris/projects/image_classification/caltech_birds'
 TRAIN:
-    NUM_EPOCHS: 40
+    NUM_EPOCHS: 200
+    SCHEDULER:
+        TYPE: 'ReduceLROnPlateau'
+        PARAMS: ['mode', 'min', 'factor', 0.1, 'patience', 10, 'threshold', 0.0001, 'threshold_mode', 'rel', 'cooldown', 0, 'min_lr', 0.00001, 'eps', 1e-08]
 DATA: 
     TRANSFORMS:
         PARAMS:

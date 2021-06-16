@@ -42,9 +42,13 @@ _C.TRAIN.OPTIMIZER.PARAMS.nesterov = True
 # Learning Rate Scheduluer
 _C.TRAIN.SCHEDULER = CN()
 _C.TRAIN.SCHEDULER.TYPE = 'StepLR'
-_C.TRAIN.SCHEDULER.PARAMS = CN()
-_C.TRAIN.SCHEDULER.PARAMS.step_size = 7
-_C.TRAIN.SCHEDULER.PARAMS.gamma = 0.1
+_C.TRAIN.SCHEDULER.PARAMS = ['step_size', 7, 'gamma', 0.1] # For StepLR
+#_C.TRAIN.SCHEDULER.PARAMS = ['lr_lambda', lmbda = lambda epoch: 0.95] # For MultiplicativeLR
+#_C.TRAIN.SCHEDULER.PARAMS = ['milestones', [30, 80], 'gamma', 0.1] # For MultiStepLR
+#_C.TRAIN.SCHEDULER.PARAMS = ['gamma', 0.1] # For ExponentialLR
+#_C.TRAIN.SCHEDULER.PARAMS = ['T_max', _C.TRAIN.NUM_EPOCHS, 'eta_min', 0.0001] # For CosineAnnealingLR
+#_C.TRAIN.SCHEDULER.PARAMS = ['mode', 'min', 'factor', 0.1, 'patience', 10, 'threshold', 0.0001, 'threshold_mode', 'rel', 'cooldown', 0, 'min_lr', 0, 'eps', 1e-08] # For ReduceLROnPlateau
+
 
 # Model directories
 _C.DIRS = CN()

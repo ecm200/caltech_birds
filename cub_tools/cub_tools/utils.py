@@ -1,6 +1,7 @@
 import pickle
 import torch
 import json
+from itertools import tee
 
 def save_model_dict(model, PATH):
     torch.save(model.state_dict(), PATH)
@@ -88,3 +89,8 @@ def save_json(json_dict, json_fname, ensure_ascii=True):
         json.dump(json_dict, json_file, ensure_ascii=ensure_ascii)
         json_file.close()
 
+def pairwise(iterable):
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = tee(iterable)
+    next(b, None)
+    return a, b
