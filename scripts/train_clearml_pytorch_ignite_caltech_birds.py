@@ -96,7 +96,7 @@ params = get_key_value_dict(cfg)
 
 # Connecting with the ClearML process
 # First add the repo package requirements that aren't on CONDA / PYPI
-Task.add_requirements('git+https://github.com/ecm200/caltech_birds.git@clearml_dev#egg=cub_tools&subdirectory=cub_tools/')
+Task.add_requirements('git+https://github.com/ecm200/caltech_birds.git#egg=cub_tools&subdirectory=cub_tools/')
 Task.add_requirements('git+https://github.com/rwightman/pytorch-image-models.git')
 # Now connect the script to ClearML Server as an experiment.
 task = Task.init(
