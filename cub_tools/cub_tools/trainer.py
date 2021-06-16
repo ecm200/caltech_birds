@@ -149,6 +149,20 @@ class Trainer():
             self.scheduler_args = dict(self.config.TRAIN.SCHEDULER.PARAMS)
             if self.config.TRAIN.SCHEDULER.TYPE == 'StepLR':
                 self.scheduler = torch_scheduler.StepLR
+            elif self.config.TRAIN.SCHEDULER.TYPE == 'MultiStepLR':
+                self.scheduler = torch_scheduler.MultiStepLR
+            elif self.config.TRAIN.SCHEDULER.TYPE == 'CyclicLR':
+                self.scheduler = torch_scheduler.CyclicLR
+            elif self.config.TRAIN.SCHEDULER.TYPE == 'ExponentialLR':
+                self.scheduler = torch_scheduler.ExponentialLR
+            elif self.config.TRAIN.SCHEDULER.TYPE == 'CosineAnnealingLR':
+                self.scheduler = torch_scheduler.CosineAnnealingLR
+            elif self.config.TRAIN.SCHEDULER.TYPE == 'ReduceLROnPlateau':
+                self.scheduler = torch_scheduler.ReduceLROnPlateau
+            elif self.config.TRAIN.SCHEDULER.TYPE == 'CosineAnnealingWarmRestarts':
+                self.scheduler = torch_scheduler.CosineAnnealingWarmRestarts
+            else:
+                raise Exception('[ERROR] You must specify one of the PyTorch standard learning rate schedulers: StepLR, MultiStepLR, CyclicLR, ExponentialLR, CosineAnnealingLR, ReduceLROnPlateau, CosineAnnealingWarmRestarts')
         else:
             self.scheduler = scheduler
             self.trainer_status['scheduler'] = True
