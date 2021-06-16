@@ -149,7 +149,7 @@ class Trainer():
         
         if scheduler is None:
             #self.scheduler_args = dict(self.config.TRAIN.SCHEDULER.PARAMS)
-            
+
             # Take key var paired list of scheduler parameters and turn into dictionary
             self.scheduler_args = {}
             for i in np.arange(0,len(self.config.TRAIN.SCHEDULER.PARAMS),2):
@@ -168,7 +168,6 @@ class Trainer():
                 self.scheduler = torch_scheduler.CosineAnnealingLR
             elif self.config.TRAIN.SCHEDULER.TYPE == 'ReduceLROnPlateau':
                 self.scheduler = ReduceLROnPlateauScheduler # special case because the step call requires a validation loss.
-                self.scheduler_args = self.scheduler_args + ['metric_name', 'loss']
             elif self.config.TRAIN.SCHEDULER.TYPE == 'CosineAnnealingWarmRestarts':
                 self.scheduler = torch_scheduler.CosineAnnealingWarmRestarts
             else:
