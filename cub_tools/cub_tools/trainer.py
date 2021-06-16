@@ -20,6 +20,7 @@ from cub_tools.config import get_cfg_defaults
 from cub_tools.transforms import makeDefaultTransforms, makeAggresiveTransforms
 from cub_tools.train import train_model
 from cub_tools.utils import save_model_dict, save_model_full
+from cub_tools.schedulers import ReduceLROnPlateauScheduler
 
 
 class Trainer():
@@ -166,7 +167,8 @@ class Trainer():
             elif self.config.TRAIN.SCHEDULER.TYPE == 'CosineAnnealingLR':
                 self.scheduler = torch_scheduler.CosineAnnealingLR
             elif self.config.TRAIN.SCHEDULER.TYPE == 'ReduceLROnPlateau':
-                self.scheduler = torch_scheduler.ReduceLROnPlateau
+                self.scheduler = ReduceLROnPlateauScheduler # special case because the step call requires a validation loss.
+                self.scheduler_args = self.scheduler_args + ['metric_name', 'loss']
             elif self.config.TRAIN.SCHEDULER.TYPE == 'CosineAnnealingWarmRestarts':
                 self.scheduler = torch_scheduler.CosineAnnealingWarmRestarts
             else:
@@ -494,7 +496,9 @@ class Ignite_Trainer(Trainer):
                     y_pred = self.model(x)
                     loss = self.criterion(y_pred, y)
                     loss.backward()
-                    self.optimizer.step()
+                    # With ReduceLROnPlateau, the step() call needs validation loss at the end epoch, so this is handled through an evaluator event handler rather than here.
+                    if not self.config.TRAIN.SCHEDULER.TYPE == 'ReduceLROnPlateau':
+                        self.optimizer.step()
 
             return loss.item()
 
@@ -606,6 +610,10 @@ class Ignite_Trainer(Trainer):
 
         ## SETUP CALLBACKS
         print('[INFO] Creating callback functions for training loop...', end='')
+
+        # If using ReduceLROnPlateau then need to add event to handle the step() call with loss:
+        self.evaluator.add_event_handler(Events.COMPLETED, self.scheduler)
+
         # Early Stopping - stops training if the validation loss does not decrease after 5 epochs
         handler = EarlyStopping(patience=self.config.EARLY_STOPPING_PATIENCE, score_function=score_function_loss, trainer=self.train_engine)
         self.evaluator.add_event_handler(Events.COMPLETED, handler)
