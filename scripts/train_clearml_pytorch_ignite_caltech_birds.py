@@ -8,7 +8,7 @@ import pathlib
 from clearml import Task, Dataset
 
 # Local modules
-from cub_tools.trainer import ClearML_Ignite_Trainer
+from cub_tools.trainer.IgniteClearML import ClearML_Ignite_Trainer
 from cub_tools.args import get_parser
 from cub_tools.config import get_cfg_defaults, get_key_value_dict
 
