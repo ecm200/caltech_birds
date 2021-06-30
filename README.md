@@ -132,7 +132,7 @@ Unzip the dowloaded zip files into cloned repository structure that replicates t
                 #modelname1#-|
                 #modelname2#-|
         notebooks-|      ** INVESTIGATIONS OF ALL TYPES OF CNN ARCHITECTURES ON THE BIRD CLASSIFICATION PROBLEM **
-        pkg-|
+        pkg-|            ** CUB_TOOLS PYTHON PACKAGE. INSTALL FROM IN HERE.
         scripts-|        ** TRAINING SCRIPTS FOR PYTORCH CNN MODELS **
 
 
