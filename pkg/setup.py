@@ -7,8 +7,9 @@ setup(name='cub_tools',
       author='Ed Morris',
       author_email='ecm200@gmail.com',
       license='MIT',
-      package_dir={'': 'cub_tools'},
-      packages=find_packages(where="cub_tools"),
+      #package_dir={'': 'cub_tools'},
+      packages=find_packages(),
+      #packages=['cub_tools'],
       zip_safe=False,
       install_requires=[
             #'pytorch', # was set to 1.4, try latest
