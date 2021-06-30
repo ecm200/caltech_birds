@@ -182,7 +182,10 @@ class Ignite_Trainer(Trainer):
         print('[INFO] Creating callback functions for training loop...', end='')
 
         # If using ReduceLROnPlateau then need to add event to handle the step() call with loss:
-        self.evaluator.add_event_handler(Events.COMPLETED, self.scheduler)
+        if self.config.TRAIN.SCHEDULER.TYPE == 'ReduceLROnPlateau':
+            self.evaluator.add_event_handler(Events.COMPLETED, self.scheduler)
+        else:
+            print('No checkpointing required for LR Scheduler....', end='')
 
         # Early Stopping - stops training if the validation loss does not decrease after 5 epochs
         handler = EarlyStopping(patience=self.config.EARLY_STOPPING_PATIENCE, score_function=score_function_loss, trainer=self.train_engine)

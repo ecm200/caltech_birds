@@ -13,8 +13,8 @@ from ignite.contrib.handlers.clearml_logger import ClearMLSaver
 
 from clearml import OutputModel
 
-from .trainerIgnite import Ignite_Trainer
-from .trainerIgnite import score_function_acc, score_function_loss
+from .Ignite import Ignite_Trainer
+from .Ignite import score_function_acc, score_function_loss
 
 class ClearML_Ignite_Trainer(Ignite_Trainer):
 
