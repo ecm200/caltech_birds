@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(name='cub_tools',
       version='2.2.1',
@@ -7,7 +7,8 @@ setup(name='cub_tools',
       author='Ed Morris',
       author_email='ecm200@gmail.com',
       license='MIT',
-      packages=['cub_tools'],
+      package_dir={'': 'cub_tools'},
+      packages=find_packages(where="cub_tools"),
       zip_safe=False,
       install_requires=[
             #'pytorch', # was set to 1.4, try latest
@@ -19,5 +20,6 @@ setup(name='cub_tools',
             'torch-lucent',
             'pytorchcv',
             'scikit-image',
-            'Pillow']
+            'Pillow'],
+      python_requires=">=3.7"
       )
