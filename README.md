@@ -27,7 +27,7 @@ All configuration and parameters for the model training is now done through YAML
 
 Examples can be found _scripts/configs_ for the 3 model libraries that are supported by the _cub_tools_ package.
 
-For a complete list of configuration fields, see _cub_tools/cub_tools/config.py_.
+For a complete list of configuration fields, see _pkg/cub_tools/config.py_.
 
 ```yaml
 # my_project/config.py
@@ -105,7 +105,6 @@ Place the files into the root of the cloned caltech_birds repo file structure.
 Unzip the dowloaded zip files into cloned repository structure that replicates the project structure:
 
     caltech_birds-|
-        cub_tools-|
         data-|   ** SEPARATE DOWNLOAD FROM CALTECH VISIPEDIA WEBSITE **
             attributes-|
             images_orig-|   ** RENAME IMAGES FOLDER TO IMAGE_ORIG **
@@ -133,6 +132,7 @@ Unzip the dowloaded zip files into cloned repository structure that replicates t
                 #modelname1#-|
                 #modelname2#-|
         notebooks-|      ** INVESTIGATIONS OF ALL TYPES OF CNN ARCHITECTURES ON THE BIRD CLASSIFICATION PROBLEM **
+        pkg-|
         scripts-|        ** TRAINING SCRIPTS FOR PYTORCH CNN MODELS **
 
 
@@ -158,9 +158,9 @@ All other packages are standard data science tools, for a full list see the **re
 
 ## CUB_TOOLS package installation
 
-To install the cub_tools set of modules into your PyTorch environment, do the following:
+To install the cub_tools set of modules into your Python environment, do the following:
 
-  *cd cub_tools*
+  *cd pkg*
   
   *pip install .*
   
@@ -172,6 +172,6 @@ To install the cub_tools set of modules into your PyTorch environment, do the fo
 
 **scripts** directory contains the computationally intensive training scripts for various deep CNN architectures, which take longer to run (even on GPU) and are better executed in a python script. I suggest this be done using some form of terminal persistance method (if running in the cloud) to keep the terminal session open whilst the model is training, allowing you to log off the remote host without killing the process. These can typically take a few hours, to a day or so to complete the prescribed epochs. I prefer to use [TMUX](https://github.com/tmux/tmux/wiki/Getting-Started), which is a Linux utility that maintains separate terminal sessions that can be attached and detached to any linux terminal session once opened. This way, you can execute long running python training scripts inside a TMUX session, detach it, close down the terminal session and let the process run. You can then start a new terminal session, and then attach the running TMUX session to view the progress of the executed script, including all its output to terminal history.
 
-**cub_tools** directory contains all the utility functions that have been developed to process, visualise, train and evaluate CNN models, as well results post processing have been contained. It has been converted into a python package that can be installed in the local environment by running in the **cub_tools** directory, *pip install -e .*. The functions can then be accessed using the cub_tools module import as ***import cub_tools***.
+**pkg** directory contains all the utility functions that have been developed to process, visualise, train and evaluate CNN models, as well results post processing have been contained. It has been converted into a python package that can be installed in the local environment by running in the **pkg** directory, *pip install -e .*. The functions can then be accessed using the cub_tools module import as ***import cub_tools***.
 
 **models** directory contains the results from the model training processes, and also any other outputs from the evaluation processes including model predictions, network feature maps etc. **All model outputs used by the example notebooks can be downloaded from the release folder of the Github repo.** The models zip should be placed in the root of the repo directory structure and unziped to create a models directory with the ResNet152 results contained within. Other models are also available including PNASNET, Inception V3 and V4, GoogLenet and ResNeXt variants.
