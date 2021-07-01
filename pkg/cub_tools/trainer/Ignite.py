@@ -133,10 +133,16 @@ class Ignite_Trainer(Trainer):
         self.train_engine.add_event_handler(Events.EPOCH_COMPLETED, lambda _: self.scheduler.step())
 
    
-    def add_tensorboard_logging(self):
+    def add_tensorboard_logging(self, logging_dir=None):
 
         # Add TensorBoard logging
-        self.tb_logger = TensorboardLogger(log_dir=os.path.join(self.config.DIRS.WORKING_DIR,'tb_logs'))
+        if logging_dir is None:
+            os.path.join(self.config.DIRS.WORKING_DIR,'tb_logs')
+        else:
+            os.path.join(logging_dir,'tb_logs')
+        print('[INFO] Tensorboard logging saving to:: {}'.format(logging_dir))
+
+        self.tb_logger = TensorboardLogger(log_dir=logging_dir)
         # Logging iteration loss
         self.tb_logger.attach_output_handler(
             engine=self.train_engine, 
@@ -225,7 +231,7 @@ class Ignite_Trainer(Trainer):
         print('Done')
 
 
-    def run(self):
+    def run(self, logging_dir=None, best_model_only=True):
 
         #assert self.model is not None, '[ERROR] No model object loaded. Please load a PyTorch model torch.nn object into the class object.'
         #assert (self.train_loader is not None) or (self.val_loader is not None), '[ERROR] You must specify data loaders.'
@@ -261,10 +267,10 @@ class Ignite_Trainer(Trainer):
         self.add_logging()
 
         # Create Tensorboard logging
-        self.add_tensorboard_logging()
+        self.add_tensorboard_logging(logging_dir=logging_dir)
         
         ## CALLBACKS
-        self.create_callbacks()
+        self.create_callbacks(best_model_only=best_model_only)
 
         ## TRAIN
         # Train the model
