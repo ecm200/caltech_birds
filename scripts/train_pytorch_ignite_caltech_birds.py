@@ -9,7 +9,7 @@ import argparse
 from cub_tools.trainer import Ignite_Trainer
 
 parser = argparse.ArgumentParser(description='PyTorch Image Classification Trainer - Ed Morris (c) 2021')
-parser.add_argument('--config', metavar="FILE", help='Path and name of configuration file for training. Should be a .yaml file.', required=False, default='scripts/configs/timm/efficientnet_b5_config.yaml')
+parser.add_argument('--config', metavar="FILE", help='Path and name of configuration file for training. Should be a .yaml file.', required=False, default='scripts/configs/pytorchcv/resnet34_config.yaml')
 parser.print_help()
 args = parser.parse_args()
 #config = 'configs/googlenet_config.yaml'

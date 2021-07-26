@@ -21,6 +21,9 @@ setup(name='cub_tools',
             'torch-lucent',
             'pytorchcv',
             'scikit-image',
-            'Pillow'],
+            'Pillow',
+            'yacs',
+            'torchsummary',
+            'ignite'],
       python_requires=">=3.7"
       )
