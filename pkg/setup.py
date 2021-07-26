@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='cub_tools',
-      version='2.2.1a',
+      version='2.2.3',
       description='Caltech UCSD Birds Database Tools for PyTorch Image Classification',
       url='https://github.com/ecm200/caltech_birds',
       author='Ed Morris',
