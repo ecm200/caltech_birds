@@ -7,3 +7,5 @@ nabirds_models
 notebooks/*.html
 *.egg-info
 .vscode/*
+*/build/*
+*/dist/*
