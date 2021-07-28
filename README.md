@@ -179,7 +179,7 @@ See below on the requirements for installing and using the notebooks, as  well d
 
 # Installation
 
-For installation notes, see release notes.
+For installation notes, [see package installation notes](https://github.com/ecm200/caltech_birds/blob/master/pkg/readme.md).
 
 # Additional files
         
