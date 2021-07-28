@@ -22,6 +22,8 @@ jobs:
         pip install
         setuptools
         --user
+    - name: Move to package directory
+      run: cd pkg
     - name: Build a binary wheel and a source tarball
       run: python pkg/setup.py sdist bdist_wheel
     - name: Publish distribution 📦 to Test PyPI
