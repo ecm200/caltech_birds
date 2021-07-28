@@ -1,0 +1,29 @@
+name: py38_pytorch181_cubtools
+channels:
+- pytorch
+- conda-forge
+dependencies:
+- python=3.8
+- pip
+- pytorch==1.8.1
+- torchvision==0.9.1
+- cudatoolkit=11.1
+- ignite==0.4.4
+- matplotlib==3.3.4
+- numpy==1.20.2
+- pandas==1.2.4
+- captum==0.3.1
+- tensorboard
+- pip:
+    - mlflow==1.18.0
+    - pillow==8.2.0
+    - timm==0.4.9
+    - pytorchcv==0.0.65
+    - torch_lucent==0.1.8
+    - torchsummary==1.5.1
+    - yacs==0.1.8
+    - scikit_image==0.18.1
+    - furl==2.1.2
+    - imutils==0.5.4
+    - tensorboardx==2.2
+    - cub-tools==2.5.2
