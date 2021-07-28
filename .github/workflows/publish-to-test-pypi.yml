@@ -21,6 +21,7 @@ jobs:
         python -m
         pip install
         setuptools
+        wheel
         --user
     - name: Move to package directory
       run: cd pkg
