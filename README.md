@@ -35,7 +35,7 @@ cd pkg/
 pip install .
 ```
 
-### Installing a python training environm
+### Installing a python training environment
 
 An environment file for installing the runtime environment has also been provided.
 
@@ -179,25 +179,7 @@ See below on the requirements for installing and using the notebooks, as  well d
 
 # Installation
 
-The repository should be cloned into a local directory.
-
-Additional steps are required to make a suitable python environment for running.
-
-## Requirements
-
-All models have been produced using **Python v3.7**.
-All model training has been performed on **PyTorch == v1.4.0**.
-All other packages are standard data science tools, for a full list see the **requirement.txt** file
-
-## CUB_TOOLS package installation
-
-To install the cub_tools set of modules into your Python environment, do the following:
-
-  *cd pkg*
-  
-  *pip install .*
-  
- This should create an installed package in your python environment called **cub_tools**.
+For installation notes, see release notes.
 
 # Additional files
         
