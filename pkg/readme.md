@@ -16,7 +16,7 @@ pip install .
 
 # Installing a python training environment
 
-An environment file for installing the runtime environment has also been provided.
+An environment file for installing the runtime environment has also been provided, in the root of the repository [conda dependencies](https://github.com/ecm200/caltech_birds/blob/master/conda_dependencies.yml).
 
 **This should be run on a machine with the relevant version of the CUDA drivers installed, at current time of writing 11.1. To change the CUDA version, ensure that the cudatoolkit version is correct for the version you have installed, and also check the PyTorch version**. 
 
