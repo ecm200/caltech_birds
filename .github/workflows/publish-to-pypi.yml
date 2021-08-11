@@ -5,8 +5,8 @@ name: Publish Python 🐍 distributions 📦 to PyPI
 # Controls when the workflow will run. This will run either when manually exectued from actions or when a new release is published.
 on: 
   workflow_dispatch:
-  release:
-    types: [published]
+  #release:
+  #  types: [published]
   
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
