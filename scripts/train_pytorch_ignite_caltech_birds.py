@@ -7,12 +7,21 @@ import argparse
 
 # Local modules
 from cub_tools.trainer import Ignite_Trainer
+from cub_tools.args import get_parser
 
-parser = argparse.ArgumentParser(description='PyTorch Image Classification Trainer - Ed Morris (c) 2021')
-parser.add_argument('--config', metavar="FILE", help='Path and name of configuration file for training. Should be a .yaml file.', required=False, default='scripts/configs/pytorchcv/resnet34_config.yaml')
+'''
+Ignite Training Script
+
+Train a PyTorch model using the Ignite framework.
+Ed Morris (c) 2021.
+'''
+
+## PROGRAM START
+
+# Get the arguments from the command line, including configuration file and any overrides.
+parser = get_parser()
 parser.print_help()
 args = parser.parse_args()
-#config = 'configs/googlenet_config.yaml'
 
 trainer = Ignite_Trainer(config=args.config)
 
