@@ -274,7 +274,7 @@ class Ignite_Trainer(Trainer):
             # Print summary of model
             summary(self.model, device='cpu', batch_size=self.config.TRAIN.BATCH_SIZE, input_size=( 3, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size, self.config.DATA.TRANSFORMS.PARAMS.DEFAULT.img_crop_size))
         
-    def convert_to_torchscript(self, checkpoint_file=None, torchscript_model_path=None, method='trace', return_jit_model=False):
+    def convert_to_torchscript(self, checkpoint_file=None, torchscript_model_path=None, method='trace', return_jit_model=False, save_jit_file=True):
 
         assert self.trainer_status['model'], '[ERROR] You must create the model to load the weights. Use Trainer.create_model() method to first create your model, then load weights.'
         assert checkpoint_file is not None, '[ERROR] You must provide the path and name of a PyTorch Ignite checkpoint file of model weights [checkpoint_file].'
@@ -282,7 +282,7 @@ class Ignite_Trainer(Trainer):
         # Update the Trainer class attribute model with model weights file
         self.update_model_from_checkpoint(checkpoint_file=checkpoint_file)
 
-        if torchscript_model_path is None:
+        if (torchscript_model_path is None) and (save_jit_file):
             torchscript_model_path = os.path.join(os.getcwd(),'torchscript_model.pt')
 
         if method == 'trace':
@@ -295,15 +295,17 @@ class Ignite_Trainer(Trainer):
             # Trace the model
             jit_model = torch.jit.trace(self.model, (X))
             # Write the trace module of the model to disk
-            print('[INFO] Torchscript file being saved to temporary location:: {}'.format(torchscript_model_path))
-            jit_model.save(torchscript_model_path)
+            if save_jit_file:
+                print('[INFO] Torchscript file being saved to temporary location:: {}'.format(torchscript_model_path))
+                jit_model.save(torchscript_model_path)
 
         elif method == 'script':
             # Trace the model
             jit_model = torch.jit.script(self.model)
             # Write the trace module of the model to disk
-            print('[INFO] Torchscript file being saved to temporary location:: {}'.format(torchscript_model_path))
-            jit_model.save(torchscript_model_path)
+            if save_jit_file:
+                print('[INFO] Torchscript file being saved to temporary location:: {}'.format(torchscript_model_path))
+                jit_model.save(torchscript_model_path)
 
 
         if return_jit_model:
