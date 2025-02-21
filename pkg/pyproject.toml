@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cub_tools"
+version = "2.5.9"
+description = "Caltech UCSD Birds Database Tools for PyTorch Image Classification"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {text = "MIT"}
+authors = [
+    {name = "Ed Morris", email = "ecm200@gmail.com"}
+]
+dependencies = [
+    "imutils",
+    "pandas",
+    "matplotlib",
+    "numpy",
+    "torch",
+    "torchvision",
+    "pytorchcv",
+    "scikit-image",
+    "Pillow",
+    "yacs",
+    "torchsummary",
+    "ignite"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/ecm200/caltech_birds"
+
